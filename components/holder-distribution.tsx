@@ -14,7 +14,7 @@ export function HolderDistribution() {
         >
           <span className="text-sm text-gray-400">{holder.address}</span>
           <div className="text-right">
-            <div className="text-sm">{holder.tokens} tokens</div>
+            <div className="text-sm text-gray-400">{holder.tokens} tokens</div>
             <div className="text-xs text-gray-400">{holder.percentage}</div>
           </div>
         </div>

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Copy } from 'lucide-react'
-import { ArrowDownUp } from 'lucide-react'
 // import { TokenChart } from "@/components/token-chart"
 import { TradeHistory } from "@/components/trade-history"
 import { BiddingProgress } from "@/components/bidding-progress"
@@ -13,6 +12,7 @@ import { HolderDistribution } from "@/components/holder-distribution"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TokenDetail({ id }: { id: string }) {
   const [token] = useState({
     name: "Example Token",
@@ -64,7 +64,8 @@ export function TokenDetail({ id }: { id: string }) {
   const [tradeUnit, setTradeUnit] = useState<'ETH' | string>('ETH');
   const [tokenAmount, setTokenAmount] = useState('')
   const [ethAmount, setEthAmount] = useState('')
-  const [sellPercentage, setSellPercentage] = useState(100)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [sellPercentage, setSellPercentage] = useState(100) 
 
   const handleTradeTypeChange = (isBuy: boolean) => {
     setTradeType(isBuy ? 'buy' : 'sell')
@@ -88,6 +89,7 @@ export function TokenDetail({ id }: { id: string }) {
     setTokenAmount(isNaN(parseFloat(tokenValue)) ? '' : tokenValue)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSellPercentageChange = (value: number) => {
     setSellPercentage(value)
     // Assuming the user has 1000 tokens as balance
@@ -236,7 +238,7 @@ export function TokenDetail({ id }: { id: string }) {
             <div>
               <div className="text-sm text-gray-400">Contract Address</div>
               <div className="flex items-center space-x-2">
-                <code className="text-sm bg-green-900/30 px-2 py-1 rounded">
+                <code className="text-sm text-gray-400 px-2 py-1 rounded">
                   {token.contractAddress}
                 </code>
                 <Button

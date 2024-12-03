@@ -20,7 +20,8 @@ export function TokenColumns() {
     { name: "SweetDeal", symbol: "SWED", price: "0.002 ETH", marketCap: "20K", status: "bidding" },
   ])
 
-  const [completedTokens, setCompletedTokens] = useState<Token[]>([
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [completedTokens, setCompletedTokens] = useState<Token[]>([ 
     { name: "GreenGains", symbol: "GG", price: "0.005 ETH", marketCap: "50K", status: "completed" },
     { name: "LuckyPot", symbol: "LP", price: "0.003 ETH", marketCap: "30K", status: "completed" },
   ])

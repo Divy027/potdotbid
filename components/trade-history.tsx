@@ -30,7 +30,7 @@ export function TradeHistory() {
             <span className="text-sm text-gray-400">{trade.address}</span>
           </div>
           <div className="text-right">
-            <div className="text-sm">{trade.amount} tokens</div>
+            <div className="text-sm text-gray-400">{trade.amount} tokens</div>
             <div className="text-sm text-gray-400">{trade.price}</div>
             <div className="text-xs text-gray-500">{trade.time}</div>
           </div>

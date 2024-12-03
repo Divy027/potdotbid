@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Twitter, MessageCircle } from 'lucide-react'
+import { X, MessageCircle } from 'lucide-react'
 import { useRouter } from "next/navigation"
 
 interface TokenCardProps {
@@ -57,7 +57,7 @@ export function TokenCard({ token }: TokenCardProps) {
         <p className="text-sm text-gray-300">{token.description}</p>
         <div className="flex space-x-2">
           <a href={token.social.x} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
-            <Twitter className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </a>
           <a href={token.social.tg} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
             <MessageCircle className="h-4 w-4" />
