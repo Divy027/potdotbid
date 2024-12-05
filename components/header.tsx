@@ -80,7 +80,7 @@ export function Header() {
       console.log("REMOEV")
       localStorage.removeItem('token');
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, disconnect]);
 
   return (
     <>

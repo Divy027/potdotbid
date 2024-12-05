@@ -6,33 +6,9 @@ import { X, MessageCircle } from 'lucide-react'
 import { useRouter } from "next/navigation"
 import logo from "../app/potdotbidLogo.jpg"
 
-interface TokenCardProps {
-  token: {
-    tokenSymbol: string
-    tokenImage: string,
-    creator: string,
-    liquidity: string,
-    marketcap: string,
-    txnsBuy: string,
-    txnsSell: string,
-    tokenAddr: string,
-    tokenName: string,
-    price: string,
-    buyVolume: string,
-    sellVolume: string,
-    status: string,
-    social: {
-      X: string,
-      tg: string
-    },
-    description: string
-  }
-}
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function TokenCard({ token }: any) {
   const router = useRouter()
-  
-  const imageSrc = token.image || "/placeholder.svg?height=100&width=100"
 
   const handleClick = () => {
     // In a real app, you'd use a proper token ID

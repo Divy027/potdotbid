@@ -31,7 +31,7 @@ interface Token {
 
 export function TokenGrid() {
   const [tokens, setTokens] = useState<Token[]>([])
-  const {address, isConnected} = useAppKitAccount()
+  const { isConnected} = useAppKitAccount()
   const { walletProvider } = useAppKitProvider('eip155')
   const [ethAmount, setEthAmount] = useState("0")
   const [error, setError] = useState("");
@@ -94,8 +94,8 @@ export function TokenGrid() {
   
       try {
        if (!isConnected) return;
-
-        const ethersProvider = new ethers.providers.Web3Provider(walletProvider as any)
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ethersProvider = new ethers.providers.Web3Provider(walletProvider as any)
 
         const signer = ethersProvider.getSigner()
        console.log(ethAmount)
@@ -114,7 +114,7 @@ export function TokenGrid() {
         // The Contract object
         const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
 
-        let hash : string;
+        let hash = "";
 
         BondingContract.on("TokenCreate", async function listener(newTokenAddress, tokenCount, creator, event) {
             if (creator == await signer.getAddress()) {

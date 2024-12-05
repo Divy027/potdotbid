@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CountdownTimer({ endTime, migrated }: any) {
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(endTime));
 
@@ -11,6 +11,7 @@ export function CountdownTimer({ endTime, migrated }: any) {
     return () => clearInterval(interval);
   }, [endTime]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function calculateTimeLeft(endTime: any) {
     const difference = endTime - new Date().getTime();
     const time = {

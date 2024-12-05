@@ -44,8 +44,8 @@ export function TokenDetail({ id }: { id: string }) {
   const [tokenAmount, setTokenAmount] = useState('')
   const [ethAmount, setEthAmount] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sellPercentage, setSellPercentage] = useState(100) 
-  const {address, isConnected} = useAppKitAccount()
+  // const [sellPercentage, setSellPercentage] = useState(100) 
+  const {isConnected} = useAppKitAccount()
   const { walletProvider } = useAppKitProvider('eip155')
   const [ethBalance, setEthBalance] = useState("");
   const [tokenBalance, setTokenBalance] = useState("");
@@ -56,7 +56,7 @@ export function TokenDetail({ id }: { id: string }) {
     setTradeType(isBuy ? 'buy' : 'sell')
     setTokenAmount('')
     setEthAmount('')
-    setSellPercentage(100)
+    //setSellPercentage(100)
     if (isBuy) {
       setTradeUnit('ETH')
     }
@@ -64,6 +64,7 @@ export function TokenDetail({ id }: { id: string }) {
 
   const handleTokenAmountChange = async(value: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const provider = new ethers.providers.Web3Provider(walletProvider as any);
       const signer = provider.getSigner()
       const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
@@ -86,6 +87,7 @@ export function TokenDetail({ id }: { id: string }) {
   const handleEthAmountChange = async(value: string) => {
     try {
       setEthAmount(value)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const provider = new ethers.providers.Web3Provider(walletProvider as any);
       const signer = provider.getSigner()
       const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
@@ -102,13 +104,14 @@ export function TokenDetail({ id }: { id: string }) {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSellPercentageChange = (value: number) => {
-    setSellPercentage(value)
+    //setSellPercentage(value)
     // Assuming the user has 1000 tokens as balance
     setTokenAmount((1000 * value / 100).toString())
   }
 
   const handlebuysell = async() => {
     try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const provider = new ethers.providers.Web3Provider(walletProvider as any);
     const signer = provider.getSigner()
     const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
@@ -173,6 +176,7 @@ export function TokenDetail({ id }: { id: string }) {
   const fetchBalances = async () => {
     try {
       // Fetch ETH balance
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const provider = new ethers.providers.Web3Provider(walletProvider as any);
       const signer = provider.getSigner()
       const balance = await provider.getBalance(await signer.getAddress());
@@ -233,7 +237,7 @@ export function TokenDetail({ id }: { id: string }) {
 
       fetchBalances();
     }
-  }, [isConnected]);
+  }, [isConnected, fetchBalances]);
 
   return (
     <div className="space-y-6">

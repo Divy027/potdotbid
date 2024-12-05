@@ -2,7 +2,7 @@ interface Holder {
   address: string;
   percentage: string;
   tokens: string;
-  txHash: String;
+  txHash: string;
 }
 
 interface HolderDistributionProps {
