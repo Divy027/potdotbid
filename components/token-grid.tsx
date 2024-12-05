@@ -1,12 +1,16 @@
 "use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { TokenCard } from "@/components/token-card"
+import { backend_url, BondingCurve } from "@/config"
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react"
+import { ethers } from "ethers"
+import { toast } from "react-toastify"
 
 interface Token {
   name: string
@@ -26,61 +30,12 @@ interface Token {
 }
 
 export function TokenGrid() {
-  const [tokens, setTokens] = useState<Token[]>([
-    { 
-      name: "HoneyPot1", 
-      symbol: "HP1", 
-      description: "The sweetest deal in crypto",
-      image: null,
-      social: { x: "honeypot1", tg: "honeypot1" },
-      price: "0.001 ETH", 
-      marketCap: "10K", 
-      volume: "5K", 
-      liquidity: "2K", 
-      holders: 50, 
-      status: "bidding" 
-    },
-    { 
-      name: "SweetDeal", 
-      symbol: "SWED", 
-      description: "A deal too sweet to resist",
-      image: null,
-      social: { x: "sweetdeal", tg: "sweetdeal" },
-      price: "0.002 ETH", 
-      marketCap: "20K", 
-      volume: "8K", 
-      liquidity: "4K", 
-      holders: 75, 
-      status: "bidding" 
-    },
-    { 
-      name: "GreenGains", 
-      symbol: "GG", 
-      description: "Grow your wealth with green gains",
-      image: null,
-      social: { x: "greengains", tg: "greengains" },
-      price: "0.005 ETH", 
-      marketCap: "50K", 
-      volume: "20K", 
-      liquidity: "10K", 
-      holders: 200, 
-      status: "completed" 
-    },
-    { 
-      name: "LuckyPot", 
-      symbol: "LP", 
-      description: "Your lucky day is here",
-      image: null,
-      social: { x: "luckypot", tg: "luckypot" },
-      price: "0.003 ETH", 
-      marketCap: "30K", 
-      volume: "12K", 
-      liquidity: "6K", 
-      holders: 100, 
-      status: "completed" 
-    },
-  ])
-
+  const [tokens, setTokens] = useState<Token[]>([])
+  const {address, isConnected} = useAppKitAccount()
+  const { walletProvider } = useAppKitProvider('eip155')
+  const [ethAmount, setEthAmount] = useState("0")
+  const [error, setError] = useState("");
+  
   const [newToken, setNewToken] = useState<Omit<Token, 'price' | 'marketCap' | 'volume' | 'liquidity' | 'holders' | 'status'>>({
     name: "",
     symbol: "",
@@ -89,21 +44,135 @@ export function TokenGrid() {
     social: { x: "", tg: "" }
   })
 
-  const handleNewToken = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newToken.name && newToken.symbol) {
-      setTokens([...tokens, { 
-        ...newToken, 
-        price: "0.001 ETH", 
-        marketCap: "0", 
-        volume: "0",
-        liquidity: "0",
-        holders: 0,
-        status: "bidding" 
-      }])
-      setNewToken({ name: "", symbol: "", description: "", image: null, social: { x: "", tg: "" } })
+  useEffect(() => {
+    // Fetch all tokens on component mount
+    async function fetchTokens() {
+      try {
+        const response = await axios.get(`${backend_url}/api/tokens/getAll`)
+        if (response.data.success) {
+          setTokens(response.data.tokens)
+          console.log(response.data.tokens)
+        }
+      } catch (error) {
+        console.error("Error fetching tokens:", error)
+      }
     }
-  }
+
+    fetchTokens()
+  }, [])
+
+  // const handleImageUploadurl = async (file: any) => {
+  //   const formData = new FormData();
+  //   formData.append("file", file);
+  
+  //   try {
+  //     const response = await axios.post("https://freeimage.host/api/1/upload", formData, {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       }
+  //     });
+  
+  //     if (response.data.success) {
+  //       // The URL for the uploaded image
+  //       const imageUrl = response.data.url;
+  //       console.log('Image URL:', imageUrl);
+  //       return imageUrl;
+  
+  //       // Now you can use the image URL for your backend or anywhere in your app
+  //       // Example: send it to your backend with other form data
+  //     }
+  //   } catch (error) {
+  //     console.error('Error uploading image:', error);
+  //   }
+  // };
+
+  const handleNewToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    if (newToken.name && newToken.symbol && newToken.description) {
+      
+  
+      try {
+       if (!isConnected) return;
+
+        const ethersProvider = new ethers.providers.Web3Provider(walletProvider as any)
+
+        const signer = ethersProvider.getSigner()
+       console.log(ethAmount)
+        const balance = await ethersProvider.getBalance(await signer.getAddress());
+        console.log("BALANCE",balance.toString());
+        //console.log("BALANCE",ethers.utils.parseEther(ethAmount.toString()).toString());
+        if (Number(ethAmount) > 0 ){
+          console.log('checking')
+          if (balance.lte(ethers.utils.parseEther(ethAmount))) {
+            console.log("Less balance")
+            return;
+          }
+        }
+      
+         
+        // The Contract object
+        const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
+
+        let hash : string;
+
+        BondingContract.on("TokenCreate", async function listener(newTokenAddress, tokenCount, creator, event) {
+            if (creator == await signer.getAddress()) {
+                console.log("Token created:");
+                console.log("Token Address:", newTokenAddress);
+                console.log("Event Details:", event);
+
+                const tokenData = {
+                    name: newToken.name,
+                    symbol: newToken.symbol,
+                    description: newToken.description,
+                    social: newToken.social,
+                    address: newTokenAddress,
+                    signature: hash,
+                    avatar: "https://pink-acceptable-heron-641.mypinata.cloud/files/bafkreibobif7s6nyfnl3osaqkynliuywnw2o7zl6wkbccp7xn7fdyur3hi?X-Algorithm=PINATA1&X-Date=1733391021&X-Expires=30&X-Method=GET&X-Signature=901eb8293c2d2ceb554b24e18f062ddb4b3f14913c6ca932b7339ce677cd5360"
+                };
+
+                try {
+                    const response = await axios.post(`${backend_url}/api/tokens/create`, tokenData, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-auth-token": localStorage.getItem('token')
+                        }
+                    });
+
+                    if (response.data.success) {
+                        setTokens((prevTokens) => [...prevTokens, response.data.token]);
+                        setNewToken({ name: "", symbol: "", description: "", image: null, social: { x: "", tg: "" } });
+                        toast.success("TOKEN CREATE SUCCESSFULL")
+                        // Stop listening for the event after success
+                        BondingContract.off("TokenCreate", listener);
+                        console.log("Stopped listening to TokenCreate event.");
+                    }
+                } catch (error) {
+                    console.error("Error while posting to backend:", error);
+                }
+            }
+        });
+
+        console.log("name",newToken.name);
+        console.log("symbol",newToken.symbol);
+        console.log("msg.value",ethers.utils.parseEther(ethAmount).toString());
+        const tx = await BondingContract.createAndInitPurchase(newToken.name, newToken.symbol, {
+          value: ethers.utils.parseEther(ethAmount)
+        });
+        hash = tx.hash;
+        await tx.wait();
+       
+
+      } catch (error) {
+        console.error("Error creating token:", error);
+      }
+    }else {
+      setError("Name, Symbol and description are required.");
+      console.log("Not present");
+    }
+  };
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -178,7 +247,7 @@ export function TokenGrid() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="x" className="text-green-400">X (Twitter) Link</Label>
+                <Label htmlFor="x" className="text-green-400">X  Link (optional)</Label>
                 <Input
                   id="x"
                   name="x"
@@ -189,7 +258,7 @@ export function TokenGrid() {
                 />
               </div>
               <div>
-                <Label htmlFor="tg" className="text-green-400">Telegram Link</Label>
+                <Label htmlFor="tg" className="text-green-400">Telegram Link (optional)</Label>
                 <Input
                   id="tg"
                   name="tg"
@@ -200,6 +269,19 @@ export function TokenGrid() {
                 />
               </div>
             </div>
+            <div>
+                <Label htmlFor="ethAmount" className="text-green-400">Eth Amount to buy new token (optional)</Label>
+                <Input
+                  id="ethAmount"
+                  type="number"
+                  name="ethAmount"
+                  value={ethAmount}
+                  onChange={(e)=>setEthAmount(e.target.value) }
+                  className="bg-green-900/30 border-green-400 text-white"
+                />
+              </div>
+            
+              <span className="text-red-600 mt-2"> {error}</span>
             <Button type="submit" className="w-full bg-green-400 text-black hover:bg-green-300">Create Token</Button>
           </form>
         </CardContent>
@@ -226,4 +308,3 @@ export function TokenGrid() {
     </div>
   )
 }
-

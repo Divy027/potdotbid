@@ -1,15 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { X, MessageCircle } from "lucide-react";
 import { HowItWorks } from "./how-it-works";
 import Image from "next/image"; // Import Image component
 import logo from "@/app/potdotbidLogo-removebg-preview.png"; // Import image
+import { useAppKit, useAppKitAccount, useDisconnect } from '@reown/appkit/react'
+import { formatWalletAddress } from "@/lib/utils";
+import { ethers } from "ethers";
+import { backend_url } from "@/config";
 
 export function Header() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const { open } = useAppKit();
+  const {  isConnected,address } = useAppKitAccount();
+  const {disconnect} = useDisconnect();
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  // Automatically register user after wallet connection
+  useEffect(() => {
+    const registerUser = async () => {
+      if (!address) return;
+
+      try {
+        const old_token = localStorage.getItem("token");
+        console.log("OLD TOKEN",old_token)
+        if (old_token) return;
+        setIsRegistering(true);
+       
+
+       // Fetch a nonce from the backend
+      const nonceResponse = await fetch(`${backend_url}/api/users/nonce`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: address }),
+      });
+
+      if (!nonceResponse.ok) {
+        disconnect();
+        throw new Error("Failed to fetch nonce");
+        
+      }
+
+      const { nonce } = await nonceResponse.json();
+
+      // Request a signature from the user's wallet
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const signature = await signer.signMessage(nonce);
+
+      // Send the signature and address to the backend for verification
+      const verifyResponse = await fetch(`${backend_url}/api/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: address, signature, nonce }),
+      });
+
+      if (!verifyResponse.ok) {
+        disconnect()
+        throw new Error("Verification failed");
+      }
+
+      const { token, user } = await verifyResponse.json();
+      console.log("Registration successful:", user);
+      localStorage.setItem("token", token);
+    } catch (error) {
+      disconnect();
+      console.error("Error registering user:", error);
+    } finally {
+      setIsRegistering(false);
+    }
+    };
+
+    if (isConnected) {
+      registerUser();
+    }else {
+      console.log("REMOEV")
+      localStorage.removeItem('token');
+    }
+  }, [isConnected, address]);
 
   return (
     <>
@@ -47,11 +118,18 @@ export function Header() {
             </div>
 
             {/* Right Section with Connect Wallet Button */}
+            
             <Button
               variant="outline"
               className="text-sm border-green-400 text-green-400 hover:bg-green-400 hover:text-black"
+              onClick={() => open()}
+              disabled={isRegistering} // Disable button while registering
             >
-              Connect Wallet
+              {isRegistering
+                ? "Registering..."
+                : isConnected
+                ? formatWalletAddress(address || "")
+                : "Connect Wallet"}
             </Button>
           </div>
         </div>

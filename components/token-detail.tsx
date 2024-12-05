@@ -11,9 +11,20 @@ import { BiddingProgress } from "@/components/bidding-progress"
 import { HolderDistribution } from "@/components/holder-distribution"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CountdownTimer } from "./countdown-timer"
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react"
+import { ethers } from "ethers"
+import { BondingCurve, ERC20ABI } from "@/config"
+import { toast } from "react-toastify"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TokenDetail({ id }: { id: string }) {
+
+   const holders = [
+    { address: "0x1234...5678", percentage: "25%", tokens: "250,000", txHash: "0x123" },
+    { address: "0x8765...4321", percentage: "15%", tokens: "150,000", txHash: "0x123" },
+    { address: "0xabcd...ef12", percentage: "10%", tokens: "100,000", txHash: "0x123" },
+  ]
   const [token] = useState({
     name: "Example Token",
     symbol: "EX",
@@ -24,11 +35,166 @@ export function TokenDetail({ id }: { id: string }) {
     marketCap: "$100,000",
     currentPrice: "0.001 ETH",
     biddingProgress: 65,
+    nextSellingTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    selectedAddresses: ["0x1234567890abcdef1234567890abcdef12345678"],
+
   })
+  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
+  const [tradeUnit, setTradeUnit] = useState<'ETH' | string>('ETH');
+  const [tokenAmount, setTokenAmount] = useState('')
+  const [ethAmount, setEthAmount] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [sellPercentage, setSellPercentage] = useState(100) 
+  const {address, isConnected} = useAppKitAccount()
+  const { walletProvider } = useAppKitProvider('eip155')
+  const [ethBalance, setEthBalance] = useState("");
+  const [tokenBalance, setTokenBalance] = useState("");
+
+  const tokenAddress = id;
+
+  const handleTradeTypeChange = (isBuy: boolean) => {
+    setTradeType(isBuy ? 'buy' : 'sell')
+    setTokenAmount('')
+    setEthAmount('')
+    setSellPercentage(100)
+    if (isBuy) {
+      setTradeUnit('ETH')
+    }
+  }
+
+  const handleTokenAmountChange = async(value: string) => {
+    try {
+      const provider = new ethers.providers.Web3Provider(walletProvider as any);
+      const signer = provider.getSigner()
+      const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
+      setTokenAmount(value)
+      if (tradeType == "buy") {
+        const ethAmount = await BondingContract.getEthAmountToBuyTokens(tokenAddress, ethers.utils.parseEther(value));
+        setEthAmount(ethers.utils.formatEther(ethAmount))
+  
+      }else {
+        const ethAmount = await BondingContract.getEthAmountBySale(tokenAddress, ethers.utils.parseEther(value));
+        setEthAmount(ethers.utils.formatEther(ethAmount))
+      }
+    }catch (e){
+      console.log(e);
+    }
+   
+    
+  }
+
+  const handleEthAmountChange = async(value: string) => {
+    try {
+      setEthAmount(value)
+      const provider = new ethers.providers.Web3Provider(walletProvider as any);
+      const signer = provider.getSigner()
+      const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
+      setTokenAmount(value)
+    
+      const tokenAmount = await BondingContract.getTokenAmountByPurchase(tokenAddress, ethers.utils.parseEther(value));
+      setTokenAmount(ethers.utils.formatEther(tokenAmount));
+    } catch (e){
+      console.log(e)
+    }
+   
+    
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSellPercentageChange = (value: number) => {
+    setSellPercentage(value)
+    // Assuming the user has 1000 tokens as balance
+    setTokenAmount((1000 * value / 100).toString())
+  }
+
+  const handlebuysell = async() => {
+    try {
+    const provider = new ethers.providers.Web3Provider(walletProvider as any);
+    const signer = provider.getSigner()
+    const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
+    if (tradeType == "buy") {
+      const balance = await provider.getBalance(await signer.getAddress());
+      if (ethers.utils.parseEther(ethAmount).gte(balance)) {
+        console.log("LESS BALANCE")
+        toast.error("LESS BALANCE")
+        return;
+      }
+      const outAmount = await BondingContract.getTokenAmountByPurchase(tokenAddress, ethers.utils.parseEther(ethAmount));
+      const tx = await BondingContract.purchaseToken(tokenAddress,outAmount, 
+        {
+           value: ethers.utils.parseEther(ethAmount)
+
+        });
+      await tx.wait();
+      console.log("BUYING SUCCCESFULLL");
+      toast.success("Buy Succesfull");
+      await fetchBalances();
+
+    }else {
+      const tokenContract = new ethers.Contract(
+        tokenAddress,
+        ERC20ABI,
+        signer
+      );
+      const tokenBalance = await tokenContract.balanceOf(await signer.getAddress());
+      if (ethers.utils.parseEther(tokenAmount).gte(tokenBalance)) {
+        console.log("LESS BALANCE")
+        toast.error("LESS BALANCE")
+        return;
+      }
+
+      const currentAllowance = await tokenContract.allowance(
+        await signer.getAddress(),
+        BondingCurve.contractAddress
+      );
+      if (currentAllowance.lt(ethers.utils.parseEther(tokenAmount))) {
+        const tx = await tokenContract.approve(BondingCurve.contractAddress, ethers.utils.parseEther(tokenAmount));
+      console.log("Approval transaction sent:", tx.hash);
+
+      // Wait for the transaction to be mined
+       await tx.wait();
+      }
+      const outAmount = await BondingContract.getEthAmountBySale(tokenAddress, ethers.utils.parseEther(tokenAmount));
+      const tx = await BondingContract.sellToken(tokenAddress,ethers.utils.parseEther(tokenAmount),outAmount);
+      await tx.wait();
+      console.log("Selling SUCCCESFULLL");
+      toast.success("SEll SUCCESFULL")
+      await fetchBalances()
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
   }
+
+  const fetchBalances = async () => {
+    try {
+      // Fetch ETH balance
+      const provider = new ethers.providers.Web3Provider(walletProvider as any);
+      const signer = provider.getSigner()
+      const balance = await provider.getBalance(await signer.getAddress());
+      setEthBalance(ethers.utils.formatEther(balance));
+
+      // Fetch token balance
+      if (tokenAddress) {
+        const erc20Abi = [
+          "function balanceOf(address owner) view returns (uint256)",
+        ];
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          erc20Abi,
+          provider
+        );
+        const tokenBalance = await tokenContract.balanceOf(await signer.getAddress());
+        setTokenBalance(ethers.utils.formatUnits(tokenBalance, 18)); 
+      }
+    } catch (error) {
+      console.error("Error fetching balances:", error);
+    }
+  };
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -60,41 +226,14 @@ export function TokenDetail({ id }: { id: string }) {
     };
   }, []);
 
-  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
-  const [tradeUnit, setTradeUnit] = useState<'ETH' | string>('ETH');
-  const [tokenAmount, setTokenAmount] = useState('')
-  const [ethAmount, setEthAmount] = useState('')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sellPercentage, setSellPercentage] = useState(100) 
+  useEffect(() => {
+    if (isConnected) {
+      // Fetch ETH balance
+      
 
-  const handleTradeTypeChange = (isBuy: boolean) => {
-    setTradeType(isBuy ? 'buy' : 'sell')
-    setTokenAmount('')
-    setEthAmount('')
-    setSellPercentage(100)
-    if (isBuy) {
-      setTradeUnit('ETH')
+      fetchBalances();
     }
-  }
-
-  const handleTokenAmountChange = (value: string) => {
-    setTokenAmount(value)
-    const ethValue = (parseFloat(value) * parseFloat(token.currentPrice)).toFixed(6)
-    setEthAmount(isNaN(parseFloat(ethValue)) ? '' : ethValue)
-  }
-
-  const handleEthAmountChange = (value: string) => {
-    setEthAmount(value)
-    const tokenValue = (parseFloat(value) / parseFloat(token.currentPrice)).toFixed(6)
-    setTokenAmount(isNaN(parseFloat(tokenValue)) ? '' : tokenValue)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSellPercentageChange = (value: number) => {
-    setSellPercentage(value)
-    // Assuming the user has 1000 tokens as balance
-    setTokenAmount((1000 * value / 100).toString())
-  }
+  }, [isConnected]);
 
   return (
     <div className="space-y-6">
@@ -114,34 +253,19 @@ export function TokenDetail({ id }: { id: string }) {
             <div className="text-sm text-gray-400">Creator</div>
             <div className="text-xl font-bold text-green-400">{token.creator}</div>
           </CardContent>
-
-
           </div>
-
           <div> 
-
           <CardContent className="p-4">
             <div className="text-sm text-gray-400">Market Cap</div>
             <div className="text-xl font-bold text-green-400">{token.marketCap}</div>
           </CardContent>
-
-
           </div>
-
-
-
         </div>
-        
-        
-        
-         
-        
-        
-         
-       
       </div>
 
-      {/* Chart and Trading */}
+      
+
+      {/* Chart and Trading and Bidding Progress*/}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3">
           <Card className="bg-green-900/20 border-green-400">
@@ -169,7 +293,9 @@ export function TokenDetail({ id }: { id: string }) {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-gray-400">
                   <span>Amount</span>
-                  <span>Balance: 1000 {token.symbol}</span>
+                  <span>
+                    Balance: { tradeType == "sell" ? tradeType == "sell" && `${Number(tokenBalance).toFixed(4)} ${token.symbol}` : tradeType == "buy" && tradeUnit == "ETH" ? `${Number(ethBalance).toFixed(4)} ETH` : `${Number(tokenBalance).toFixed(4)} ${token.symbol}`}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2 bg-green-900/30 rounded-md p-2">
                   <Input 
@@ -178,7 +304,7 @@ export function TokenDetail({ id }: { id: string }) {
   value={tradeType === 'sell' ? tokenAmount : (tradeUnit === 'ETH' ? ethAmount : tokenAmount)}
   onChange={(e) => {
     if (tradeType === 'sell') {
-      setTokenAmount(e.target.value)
+      handleTokenAmountChange(e.target.value)
     } else {
       if (tradeUnit === 'ETH') {
         handleEthAmountChange(e.target.value)
@@ -190,7 +316,11 @@ export function TokenDetail({ id }: { id: string }) {
   className="bg-transparent border-none text-white text-lg"
 />
 {tradeType === 'buy' ? (
-  <Select onValueChange={(value) => setTradeUnit(value)} defaultValue="ETH">
+  <Select onValueChange={(value) => {
+    setTokenAmount('')
+    setEthAmount('')
+    setTradeUnit(value)
+    }} defaultValue="ETH">
     <SelectTrigger className="w-[100px]">
       <SelectValue placeholder="Select unit" />
     </SelectTrigger>
@@ -204,13 +334,36 @@ export function TokenDetail({ id }: { id: string }) {
 )}
                 </div>
               </div>
-              <Button className="w-full bg-green-400 text-black hover:bg-green-300">
+              {tradeType == "buy" && tradeUnit == "ETH" && 
+                <>
+                  <span className=" text-white"> You will recieve {tokenAmount} {token.symbol} </span>
+                </>
+              }
+              {tradeType == "buy" && tradeUnit == token.symbol && 
+                <>
+                  <span className=" text-white"> You will pay {ethAmount} ETH </span>
+                </>
+              }
+              {tradeType == "sell"  && 
+                <>
+                  <span className=" text-white"> You will recieve {ethAmount} ETH </span>
+                </>
+              }
+              <Button className="w-full bg-green-400 text-black hover:bg-green-300" onClick={handlebuysell}>
                 {tradeType === 'sell' ? `Sell ${token.symbol}` : `Buy ${token.symbol}`}
               </Button>
+            </CardContent>
+            <CardHeader>
+              <CardTitle className="text-green-400">Bidding Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BiddingProgress progress={token.biddingProgress} />
             </CardContent>
           </Card>
         </div>
       </div>
+
+      
 
       {/* Trade History and Token Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -239,7 +392,7 @@ export function TokenDetail({ id }: { id: string }) {
               <div className="text-sm text-gray-400">Contract Address</div>
               <div className="flex items-center space-x-2">
                 <code className="text-sm text-gray-400 px-2 py-1 rounded">
-                  {token.contractAddress}
+                  {tokenAddress}
                 </code>
                 <Button
                   variant="ghost"
@@ -255,23 +408,34 @@ export function TokenDetail({ id }: { id: string }) {
         </Card>
       </div>
 
-      {/* Bidding Progress and Holder distribution */}
-      <Card className="bg-green-900/20 border-green-400">
-        <CardHeader>
-          <CardTitle className="text-green-400">Bidding Progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BiddingProgress progress={token.biddingProgress} />
-        </CardContent>
+      {/* Countdown Timer and list of selected address and Holder distribution */}
+    <Card className="bg-green-900/20 border-green-400">
+      <CardHeader>
+        <CardTitle className="text-green-400">Next Selling Window</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-center space-y-2">
+          <div className="text-xl font-bold text-green-400">
+            {/* Replace with your countdown timer */}
+            <CountdownTimer endTime={token.nextSellingTime} migrated={false} />
+          </div>
+          <div className="text-sm text-gray-400">Time until the next selling window opens.</div>
+        </div>
+      </CardContent>
 
-        <CardHeader>
+      <CardHeader>
+        <CardTitle className="text-green-400">Addresses Selected for Selling</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <HolderDistribution holders={holders}/>
+      </CardContent>
+      <CardHeader>
           <CardTitle className="text-green-400">Holder Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <HolderDistribution />
+          <HolderDistribution holders={holders}/>
         </CardContent>
-      </Card>
-
+    </Card>
     </div>
   )
 }
