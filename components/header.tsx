@@ -30,7 +30,6 @@ export function Header() {
         if (old_token) return;
         setIsRegistering(true);
        
-
        // Fetch a nonce from the backend
       const nonceResponse = await fetch(`${backend_url}/api/users/nonce`, {
         method: "POST",
@@ -80,7 +79,7 @@ export function Header() {
       console.log("REMOEV")
       localStorage.removeItem('token');
     }
-  }, [isConnected, address, disconnect]);
+  }, [isConnected, address]);
 
   return (
     <>
