@@ -100,10 +100,10 @@ export function Header() {
               </Link>
               
               {/* Icons */}
-              <Link href="#" className="text-green-400 hover:text-green-300">
+              <Link target="_blank" href="https://x.com/potdotbid" className="text-green-400 hover:text-green-300">
                 <X className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-green-400 hover:text-green-300">
+              <Link target="_blank" href="https://t.me/potdotbid" className="text-green-400 hover:text-green-300">
                 <MessageCircle className="h-5 w-5" />
               </Link>
 
