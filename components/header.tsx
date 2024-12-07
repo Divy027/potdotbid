@@ -107,9 +107,9 @@ export function Header() {
                 <MessageCircle className="h-5 w-5" />
               </Link>
 
-              {/* How It Works Button */}
+               {/* How It Works Button */}
               <button
-                onClick={() => setShowHowItWorks(true)}
+                onClick={() => setShowHowItWorks(false)}
                 className="text-green-400 hover:text-green-300 text-sm"
               >
                 How It Works
