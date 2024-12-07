@@ -109,7 +109,10 @@ export function Header() {
 
                {/* How It Works Button */}
               <button
-                onClick={() => setShowHowItWorks(false)}
+                onClick={() => {
+                  console.log("CLICK")
+                  setShowHowItWorks(true)
+                }}
                 className="text-green-400 hover:text-green-300 text-sm"
               >
                 How It Works

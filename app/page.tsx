@@ -6,8 +6,6 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
-      
-        
         <TokenGrid />
       </main>
     </div>
