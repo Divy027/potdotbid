@@ -114,7 +114,8 @@ export function TokenGrid() {
         // The Contract object
         const BondingContract = new ethers.Contract(BondingCurve.contractAddress, BondingCurve.ABI, signer)
 
-        let hash = "";
+        let hash = '';
+        let tokenAddress = ""
 
         BondingContract.on("TokenCreate", async function listener(newTokenAddress, tokenCount, creator, event) {
             if (creator == await signer.getAddress()) {
@@ -122,7 +123,10 @@ export function TokenGrid() {
                 console.log("Token Address:", newTokenAddress);
                 console.log("Event Details:", event);
 
-                const tokenData = {
+                tokenAddress = newTokenAddress;
+
+                if (Number(ethAmount) <= 0) {
+                  const tokenData = {
                     name: newToken.name,
                     symbol: newToken.symbol,
                     description: newToken.description,
@@ -145,14 +149,64 @@ export function TokenGrid() {
                         setNewToken({ name: "", symbol: "", description: "", image: null, social: { x: "", tg: "" } });
                         toast.success("TOKEN CREATE SUCCESSFULL")
                         // Stop listening for the event after success
-                        BondingContract.off("TokenCreate", listener);
-                        console.log("Stopped listening to TokenCreate event.");
+                       
                     }
                 } catch (error) {
                     console.error("Error while posting to backend:", error);
                 }
+                finally {
+                  BondingContract.off("TokenCreate", listener);
+                  console.log("Stopped listening to TokenCreate event.");
+                }
+                }
+
+                
             }
         });
+
+        BondingContract.on("TokenPurchased", async function listener(newTokenAddress, creator,initialfunds, tokenamount) {
+          if (creator == await signer.getAddress() && tokenAddress == newTokenAddress) {
+              console.log("Token purchased:");
+              console.log("Token Address:", newTokenAddress);
+             
+              if (Number(ethAmount) > 0) {
+                const tokenData = {
+                  name: newToken.name,
+                  symbol: newToken.symbol,
+                  description: newToken.description,
+                  social: newToken.social,
+                  address: newTokenAddress,
+                  signature: hash,
+                  boughtAmount: Number(ethers.utils.formatUnits(tokenamount,18)),
+                  ethAmount: Number(ethers.utils.formatEther(initialfunds)),
+                  avatar: "https://pink-acceptable-heron-641.mypinata.cloud/files/bafkreibobif7s6nyfnl3osaqkynliuywnw2o7zl6wkbccp7xn7fdyur3hi?X-Algorithm=PINATA1&X-Date=1733391021&X-Expires=30&X-Method=GET&X-Signature=901eb8293c2d2ceb554b24e18f062ddb4b3f14913c6ca932b7339ce677cd5360"
+              };
+
+              try {
+                  const response = await axios.post(`${backend_url}/api/tokens/create`, tokenData, {
+                      headers: {
+                          "Content-Type": "application/json",
+                          "x-auth-token": localStorage.getItem('token')
+                      }
+                  });
+
+                  if (response.data.success) {
+                      setTokens((prevTokens) => [...prevTokens, response.data.token]);
+                      setNewToken({ name: "", symbol: "", description: "", image: null, social: { x: "", tg: "" } });
+                      toast.success("TOKEN CREATE SUCCESSFULL")
+                      // Stop listening for the event after success
+                     
+                  }
+              } catch (error) {
+                  console.error("Error while posting to backend:", error);
+              } finally {
+                BondingContract.off("TokenPurchase", listener);
+                console.log("Stopped listening to Purchase event.");
+              } 
+              }
+             
+          }
+      });
 
         console.log("name",newToken.name);
         console.log("symbol",newToken.symbol);

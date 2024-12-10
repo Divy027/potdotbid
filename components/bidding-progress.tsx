@@ -5,9 +5,9 @@ interface BiddingProgressProps {
 export function BiddingProgress({ progress }: BiddingProgressProps) {
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-sm">
+      <div className="flex justify-between text-sm text-gray-400">
         <span>Progress</span>
-        <span>{progress}%</span>
+        <span>{progress.toFixed(3)}%</span>
       </div>
       <div className="h-4 bg-green-900/30 rounded-full overflow-hidden">
         <div 
