@@ -385,8 +385,9 @@ export function TokenDetail({ id }: { id: string }) {
       setMarketCap(marketCap); // Update the state
 
       const tokenReserve =
-        Number(latestPriceData.data.Bidding_Poolstate[0].tokenReserve) /
+        parseFloat(latestPriceData.data.Bidding_Poolstate[0].tokenReserve) /
         10 ** 18;
+        console.log("RESERVE",tokenReserve);
       const totalSupply = tokenReserve + circulatingSupply;
 
       const percentage = (circulatingSupply / totalSupply) * 100;
