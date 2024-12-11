@@ -1,6 +1,19 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+interface OHLCTimestampData {
+  time: number; // Timestamp of the OHLC data point
+  open: number; // Open price
+  high: number; // High price
+  low: number; // Low price
+  close: number; // Close price
+}
+
+interface PriceData {
+  time: number; // Timestamp in seconds
+  price: number; // Price in ETH
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -39,3 +52,60 @@ export const formatNumber = (num: number): string => {
   
   return `${scaledNumber.toFixed(1).replace(/\.0$/, "")}${units[unitIndex]}`;
 };
+
+export const generateOHLCData = (priceData: PriceData[], intervalInMinutes: number): OHLCTimestampData[] => {
+  const ohlcData: OHLCTimestampData[] = [];
+  console.log(priceData)
+  // Edge case: if priceData is empty
+  if (priceData.length === 0) {
+    return [];
+  }
+
+  let intervalStart = priceData[0].time; // Start of the first interval
+  let open = priceData[0].price; // The first price is the open for the first interval
+  let high = priceData[0].price; // The first price is the initial high
+  let low = priceData[0].price; // The first price is the initial low
+  let close = priceData[0].price; // The first price is the initial close
+
+  const intervalInSeconds = intervalInMinutes * 60;
+
+  for (let i = 1; i < priceData.length; i++) {
+    const currentData = priceData[i];
+
+    if (currentData.time < intervalStart + intervalInSeconds) {
+      high = Math.max(high, currentData.price);
+      low = Math.min(low, currentData.price);
+      close = currentData.price; // Update close to the latest price
+    } else {
+      console.log(`Pushing OHLC data: time=${intervalStart}, open=${(open)}, high=${high}, low=${low}, close=${close}`);
+      
+      ohlcData.push({
+        time: intervalStart , // Convert to milliseconds
+        open: (open),
+        high: (high),
+        low: (low),
+        close: (close),
+      });
+
+      // Reset for the next interval
+      intervalStart = currentData.time;
+      open = currentData.price;
+      high = currentData.price;
+      low = currentData.price;
+      close = currentData.price;
+    }
+  }
+
+  console.log(`Pushing final OHLC data: time=${intervalStart}, open=${open}, high=${high}, low=${low}, close=${close}`);
+  
+  ohlcData.push({
+    time: intervalStart, // Convert to milliseconds
+    open: (open),
+    high: (high),
+    low: (low),
+    close:(close),
+  });
+
+  return ohlcData;
+};
+

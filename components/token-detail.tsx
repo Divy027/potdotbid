@@ -24,6 +24,7 @@ import { backend_url, BondingCurve, ERC20ABI, indexer } from "@/config";
 import { toast } from "react-toastify";
 import { formatWalletAddress } from "@/lib/utils";
 import axios from "axios";
+import TradingViewChart from "./TradingViewChart";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TokenDetail({ id }: { id: string }) {
@@ -73,6 +74,7 @@ export function TokenDetail({ id }: { id: string }) {
   const [progress, setProgress] = useState<number | null>(null);
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [priceData, setPriceData] = useState([]);
 
   const tokenAddress = id;
 
@@ -362,6 +364,15 @@ export function TokenDetail({ id }: { id: string }) {
         throw new Error("No price data found for the token.");
       }
 
+      const formattedData = latestPriceData.data.Bidding_PriceChanged
+      .map((entry: { timestamp: string; newPrice: string }) => ({
+        time: Number(entry.timestamp), // Convert timestamp to number (Unix timestamp)
+        price: ((ethers.utils.formatEther(entry.newPrice))), // Format price
+      }))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort((a: any, b:any) => a.time - b.time); 
+
+      setPriceData(formattedData);
       const latestEvent = latestPriceData.data.Bidding_PriceChanged[0]; // Latest price event
       const newPrice = Number(latestEvent.newPrice) / 10 ** 18; // Bonding curve price in ETH
       const circulatingSupply =
@@ -389,6 +400,19 @@ export function TokenDetail({ id }: { id: string }) {
     }
   };
 
+  const fetchTrades = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${backend_url}/api/transaction/${tokenAddress}`);
+      setTrades(response.data.transactions);
+    } catch (err) {
+      console.error("Error fetching trade history:", err);
+     // setError("Failed to load trade history");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const listenToPoolEvents = async () => {
     if (isConnected) {
       console.log("EVENT SET");
@@ -404,6 +428,8 @@ export function TokenDetail({ id }: { id: string }) {
       // Fetch and calculate market cap when an event is emitted
       //console.log(token);
       await calculateMarketCap();
+
+      fetchTrades();
     });
     }
     
@@ -422,36 +448,6 @@ export function TokenDetail({ id }: { id: string }) {
   }, []);
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/tv.js";
-    script.async = true;
-    script.onload = () => {
-      if (typeof TradingView !== "undefined") {
-        new TradingView.widget({
-          autosize: true,
-          symbol: "BINANCE:BTCUSDT", // Replace with your token's symbol
-          interval: "D",
-          timezone: "Etc/UTC",
-          theme: "dark",
-          style: "1",
-          locale: "en",
-          toolbar_bg: "#f1f3f6",
-          enable_publishing: false,
-          allow_symbol_change: true,
-          container_id: "tradingview_widget",
-        });
-      }
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (isConnected) {
       // Fetch ETH balance
 
@@ -460,18 +456,7 @@ export function TokenDetail({ id }: { id: string }) {
   }, [isConnected, fetchBalances]);
 
   useEffect(() => {
-    const fetchTrades = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${backend_url}/api/transaction/${tokenAddress}`);
-        setTrades(response.data.transactions);
-      } catch (err) {
-        console.error("Error fetching trade history:", err);
-       // setError("Failed to load trade history");
-      } finally {
-        setLoading(false);
-      }
-    };
+    
 
     const fetchToken = async () => {
       try {
@@ -535,7 +520,7 @@ export function TokenDetail({ id }: { id: string }) {
         <div className="lg:col-span-3">
           {/* <Card className="bg-green-900/20 border-green-400"> */}
             <CardContent className="p-4 h-[400px]">
-              <div className="w-full h-full" id="tradingview_widget"></div>
+              <TradingViewChart priceData={priceData}/>
             </CardContent>
           {/* </Card> */}
         </div>
