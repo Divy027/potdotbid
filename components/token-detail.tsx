@@ -20,7 +20,7 @@ import {
 import { CountdownTimer } from "./countdown-timer";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 import { ethers } from "ethers";
-import { backend_url, BondingCurve, ERC20ABI, indexer } from "@/config";
+import { backend_url, BondingCurve, ERC20ABI, indexer, RPC, TokenABI } from "@/config";
 import { toast } from "react-toastify";
 import { formatWalletAddress } from "@/lib/utils";
 import axios from "axios";
@@ -28,26 +28,7 @@ import TradingViewChart from "./TradingViewChart";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TokenDetail({ id }: { id: string }) {
-  const holders = [
-    {
-      address: "0x1234...5678",
-      percentage: "25%",
-      tokens: "250,000",
-      txHash: "0x123",
-    },
-    {
-      address: "0x8765...4321",
-      percentage: "15%",
-      tokens: "150,000",
-      txHash: "0x123",
-    },
-    {
-      address: "0xabcd...ef12",
-      percentage: "10%",
-      tokens: "100,000",
-      txHash: "0x123",
-    },
-  ];
+
   const [token, setToken] = useState({
     name: "Example Token",
     symbol: "EX",
@@ -75,6 +56,7 @@ export function TokenDetail({ id }: { id: string }) {
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceData, setPriceData] = useState([]);
+  const [holders,setHolders] = useState([])
 
   const tokenAddress = id;
 
@@ -172,6 +154,10 @@ export function TokenDetail({ id }: { id: string }) {
           tokenAddress,
           ethers.utils.parseEther(ethAmount)
         );
+
+        const valuess = await BondingContract.virtualPools("0x7D8f25276F7D9B4977042a4b95C03ba5Ea598F2b");
+        console.log("Token Reserve:", ethers.utils.formatEther(valuess.TokenReserve));
+        console.log("ETH Reserve:", ethers.utils.formatEther(valuess.ETHReserve));
   
         const tx = await BondingContract.purchaseToken(
           tokenAddress,
@@ -414,6 +400,64 @@ export function TokenDetail({ id }: { id: string }) {
     }
   };
 
+  const fetchEligibleAddresses = async () => {
+    setLoading(true);
+
+    try {
+      // Connect to the Ethereum provider
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const provider = new ethers.providers.JsonRpcProvider(RPC);
+
+      // Instantiate the contract
+      const contract = new ethers.Contract(
+        tokenAddress,
+        TokenABI,
+        provider
+      );
+     
+      // Fetch the eligible addresses
+      const addresses: string[] = await contract.getHolders();
+      console.log("ADDDDDCCC",addresses)
+
+      // Create an array to hold the address data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const addressData : any= [];
+
+      for (let i = 0; i < addresses.length; i++) {
+        const address = addresses[i];
+
+        // Fetch the balance of each address
+        const balance: ethers.BigNumber = await contract.balanceOf(address);
+
+        // Convert balance to a readable format (assuming token has 18 decimals)
+        const balanceInTokens = ethers.utils.formatUnits(balance, 18);
+
+        // Calculate the percentage holding based on the total supply
+        const percentageHolding = (parseFloat(balanceInTokens) /1000000000) * 100;
+
+        // Format the data to the structure with percentage as a string (e.g., "25%") and tokens as a string with commas
+        addressData.push({
+          address,
+          percentage: `${percentageHolding.toFixed(3)}%`, // Rounded to 2 decimal places
+          tokens: balanceInTokens, // Adds commas to the token value
+        });
+      } 
+      console.log("address",addressData)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sortedAddressData = addressData.sort((a: any, b: any) => {
+        const percentageA = parseFloat(a.percentage.replace("%", ""));
+        const percentageB = parseFloat(b.percentage.replace("%", ""));
+        return percentageB - percentageA; // Sort in descending order
+      });
+      setHolders(sortedAddressData)
+      
+    } catch (error) {
+      console.error("Error fetching eligible addresses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const listenToPoolEvents = async () => {
     if (isConnected) {
       console.log("EVENT SET");
@@ -431,6 +475,7 @@ export function TokenDetail({ id }: { id: string }) {
       await calculateMarketCap();
 
       fetchTrades();
+      fetchEligibleAddresses();
     });
     }
     
@@ -476,6 +521,7 @@ export function TokenDetail({ id }: { id: string }) {
     if (tokenAddress) {
       fetchTrades();
       fetchToken();
+      fetchEligibleAddresses()
     }
   }, [tokenAddress]);
 
@@ -757,7 +803,14 @@ export function TokenDetail({ id }: { id: string }) {
           <CardTitle className="text-green-400">Holder Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <HolderDistribution holders={holders} />
+        {loading? 
+          <>
+            <div className="text-center text-white">Loading...</div>
+          </> :
+          <>
+              <HolderDistribution holders={holders} />
+          </>}
+         
         </CardContent>
       </Card>
     </div>
