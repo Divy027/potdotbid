@@ -745,8 +745,12 @@ export function TokenDetail({ id }: { id: string }) {
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Description</div>
-          <div className="text-sm text-gray-400 px-2 py-1">{token.description}</div>
+        <div className="text-sm text-gray-400">Description</div>
+          <div
+            className="text-sm text-gray-400 px-2 py-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 s  crollbar-track-green-900 rounded"
+          >
+            {token.description}
+          </div>
         </div>
         <div>
           <div className="text-sm text-gray-400">Contract Address</div>

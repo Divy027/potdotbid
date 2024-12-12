@@ -256,7 +256,7 @@ export function TokenGrid() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleNewToken} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-2">
               <div>
                 <Label htmlFor="name" className="text-green-400">Token Name</Label>
                 <Input
@@ -277,10 +277,9 @@ export function TokenGrid() {
                   className="bg-green-900/30 border-green-400 text-white"
                 />
               </div>
-            </div>
-            <div>
+              <div>
               <Label htmlFor="description" className="text-green-400">Description</Label>
-              <Textarea
+              <Input
                 id="description"
                 name="description"
                 value={newToken.description}
@@ -288,6 +287,7 @@ export function TokenGrid() {
                 className="bg-green-900/30 border-green-400 text-white"
               />
             </div>
+
             <div>
               <Label htmlFor="image" className="text-green-400">Upload Image</Label>
               <Input
@@ -299,8 +299,12 @@ export function TokenGrid() {
                 className="bg-green-900/30 border-green-400 text-white"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+            
+
+            <div>
                 <Label htmlFor="x" className="text-green-400">X  Link (optional)</Label>
                 <Input
                   id="x"
@@ -322,8 +326,8 @@ export function TokenGrid() {
                   className="bg-green-900/30 border-green-400 text-white"
                 />
               </div>
-            </div>
-            <div>
+
+              <div>
                 <Label htmlFor="ethAmount" className="text-green-400">Eth Amount to buy new token (optional)</Label>
                 <Input
                   id="ethAmount"
@@ -334,6 +338,11 @@ export function TokenGrid() {
                   className="bg-green-900/30 border-green-400 text-white"
                 />
               </div>
+
+
+            </div>
+           
+              
             
               <span className="text-red-600 mt-2"> {error}</span>
             <Button type="submit" className="w-full bg-green-400 text-black hover:bg-green-300">Create Token</Button>

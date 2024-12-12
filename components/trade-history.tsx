@@ -1,10 +1,21 @@
 import { formatNumber, formatTime, formatWalletAddress } from "@/lib/utils";
+import { useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function TradeHistory({ trades, token }: { trades: any[], token: any }) {
+export function TradeHistory({ trades, token }: { trades: any[]; token: any }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const tradesPerPage = 6; // Number of trades per page
+
+  // Calculate indices for pagination
+  const totalPages = Math.ceil(trades.length / tradesPerPage);
+  const startIndex = (currentPage - 1) * tradesPerPage;
+  const endIndex = startIndex + tradesPerPage;
+  const currentTrades = trades.slice(startIndex, endIndex);
+
   return (
     <div className="w-full overflow-x-auto">
       <div className="bg-black p-4 rounded-lg border border-green-700">
+        {/* Header */}
         <div className="text-sm text-gray-400 grid grid-cols-6 gap-4 p-2 border-b border-green-700">
           <span className="font-semibold">Account</span>
           <span className="font-semibold">Trade Type</span>
@@ -13,8 +24,10 @@ export function TradeHistory({ trades, token }: { trades: any[], token: any }) {
           <span className="font-semibold">Time</span>
           <span className="font-semibold">Tx</span>
         </div>
-        {trades.length > 0 ? (
-          trades.map((trade, index) => (
+
+        {/* Trades */}
+        {currentTrades.length > 0 ? (
+          currentTrades.map((trade, index) => (
             <div
               key={index}
               className="grid grid-cols-6 gap-4 items-center p-2 rounded-lg bg-green-900/30 hover:bg-green-800 border border-green-700 mb-2"
@@ -46,7 +59,9 @@ export function TradeHistory({ trades, token }: { trades: any[], token: any }) {
               </span>
 
               {/* Time */}
-              <span className="text-gray-400">{formatTime(trade.timestamp)}</span>
+              <span className="text-gray-400">
+                {formatTime(trade.timestamp)}
+              </span>
 
               {/* Tx Hash */}
               <a
@@ -62,6 +77,37 @@ export function TradeHistory({ trades, token }: { trades: any[], token: any }) {
         ) : (
           <div className="text-gray-500 text-center py-4">
             No trades available for this token.
+          </div>
+        )}
+
+        {/* Pagination */}
+        {trades.length > tradesPerPage && (
+          <div className="flex justify-center items-center space-x-2 mt-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className={`px-3 py-1 border border-green-700 rounded-lg text-sm ${
+                currentPage === 1
+                  ? "text-gray-500 cursor-not-allowed"
+                  : "text-green-400 hover:bg-green-700"
+              }`}
+            >
+              Previous
+            </button>
+            <span className="text-gray-400">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className={`px-3 py-1 border border-green-700 rounded-lg text-sm ${
+                currentPage === totalPages
+                  ? "text-gray-500 cursor-not-allowed"
+                  : "text-green-400 hover:bg-green-700"
+              }`}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
