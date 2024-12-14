@@ -1,8 +1,9 @@
 interface BiddingProgressProps {
-  progress: number
+  progress: number,
+  launched: boolean
 }
 
-export function BiddingProgress({ progress }: BiddingProgressProps) {
+export function BiddingProgress({ progress, launched }: BiddingProgressProps) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm text-gray-400">
@@ -19,6 +20,10 @@ export function BiddingProgress({ progress }: BiddingProgressProps) {
         <span>0%</span>
         <span>Target: 100%</span>
       </div>
+      <span className="text-md mt-2 text-gray-400"> 
+       {launched ? <span>Liquidity is sent to uniswap v2! Check <a href="https://uniswap.org/" target="_blank" className="text-purple-500">here</a></span> : ''}
+
+      </span>
     </div>
   )
 }

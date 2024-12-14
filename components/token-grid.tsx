@@ -200,7 +200,7 @@ export function TokenGrid() {
               } catch (error) {
                   console.error("Error while posting to backend:", error);
               } finally {
-                BondingContract.off("TokenPurchase", listener);
+                BondingContract.off("TokenPurchased", listener);
                 console.log("Stopped listening to Purchase event.");
               } 
               }
