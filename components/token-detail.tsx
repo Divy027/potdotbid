@@ -714,91 +714,11 @@ export function TokenDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Trade History and Token Info */}
-      <div className="grid grid-cols-4 gap-4">
-  {/* Trade History Section */}
-  <div className="col-span-3">
-    <Card className="bg-green-900/20 border-green-400 h-full">
-      <CardHeader>
-        <CardTitle className="text-green-400">Trade History</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading? 
-          <>
-            <div className="text-center text-white">Loading...</div>
-          </> :
-          <>
-             <TradeHistory trades={trades} token={token} />
-          </>}
-     
-      </CardContent>
-    </Card>
-  </div>
-  
-  {/* Token Information Section */}
-  <div className="col-span-1">
-    <Card className="bg-green-900/20 border-green-400 h-full">
-      <CardHeader>
-        <CardTitle className="text-green-400">Token Information</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <div className="text-sm text-gray-400">Name</div>
-          <div className="font-bold text-gray-400 px-2 py-1">
-            {token.name} ({token.symbol})
-          </div>
-        </div>
-        <div>
-        <div className="text-sm text-gray-400">Description</div>
-          <div
-            className="text-sm text-gray-400 px-2 py-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 s  crollbar-track-green-900 rounded"
-          >
-            {token.description}
-          </div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-400">Contract Address</div>
-          <div className="flex items-center space-x-2">
-            <code className="text-sm text-gray-400 px-2 py-1 rounded">
-              {formatWalletAddress(tokenAddress)}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => copyToClipboard(tokenAddress)}
-              className="text-green-400 hover:text-green-300"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-      <CardHeader>
-          <CardTitle className="text-green-400">Next Selling Window</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center space-y-2">
-            <div className="text-xl font-bold text-green-400">
-              {/* Replace with your countdown timer */}
-              <CountdownTimer
-                endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
-                migrated={false}
-              />
-            </div>
-            <div className="text-sm text-gray-400">
-              Time until the next selling window opens.
-            </div>
-          </div>
-        </CardContent>
-    </Card>
-  </div>
-</div>
 
+      {/*  list of selected address and Holder distribution */}
 
-      {/* Countdown Timer and list of selected address and Holder distribution */}
-      <Card className="bg-green-900/20 border-green-400">
+      {launched &&  <Card className="bg-green-900/20 border-green-400">
         
-
         <CardHeader>
           <CardTitle className="text-green-400">
             Addresses Selected for Selling
@@ -820,7 +740,118 @@ export function TokenDetail({ id }: { id: string }) {
           </>}
          
         </CardContent>
-      </Card>
+      </Card> }
+     
+
+
+
+      {/* Trade History and Token Info */}
+      <div className="grid grid-cols-4 gap-4">
+          {/* Trade History Section */}
+          <div className="col-span-3">
+            <Card className="bg-green-900/20 border-green-400 h-full">
+              <CardHeader>
+                <CardTitle className="text-green-400">Trade History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading? 
+                  <>
+                    <div className="text-center text-white">Loading...</div>
+                  </> :
+                  <>
+                    <TradeHistory trades={trades} token={token} />
+                  </>}
+            
+              </CardContent>
+            </Card>
+          </div>
+  
+          {/* Token Information Section */}
+          <div className="col-span-1">
+            <Card className="bg-green-900/20 border-green-400 h-full">
+              <CardHeader>
+                <CardTitle className="text-green-400">Token Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="text-sm text-gray-400">Name</div>
+                  <div className="font-bold text-gray-400 px-2 py-1">
+                    {token.name} ({token.symbol})
+                  </div>
+                </div>
+                <div>
+                <div className="text-sm text-gray-400">Description</div>
+                  <div
+                    className="text-sm text-gray-400 px-2 py-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 s  crollbar-track-green-900 rounded"
+                  >
+                    {token.description}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Contract Address</div>
+                  <div className="flex items-center space-x-2">
+                    <code className="text-sm text-gray-400 px-2 py-1 rounded">
+                      {formatWalletAddress(tokenAddress)}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => copyToClipboard(tokenAddress)}
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+              <CardHeader>
+                  <CardTitle className="text-green-400">Next Selling Window</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-2">
+                    <div className="text-xl font-bold text-green-400">
+                      {/* Replace with your countdown timer */}
+                      <CountdownTimer
+                        endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
+                        migrated={false}
+                      />
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      Time until the next selling window opens.
+                    </div>
+                  </div>
+                </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {!launched &&  <Card className="bg-green-900/20 border-green-400">
+        
+        <CardHeader>
+          <CardTitle className="text-green-400">
+            Addresses Selected for Selling
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <HolderDistribution holders={holders} />
+        </CardContent>
+        <CardHeader>
+          <CardTitle className="text-green-400">Holder Distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+        {loading? 
+          <>
+            <div className="text-center text-white">Loading...</div>
+          </> :
+          <>
+              <HolderDistribution holders={holders} />
+          </>}
+         
+        </CardContent>
+      </Card> }
+
+
+      
     </div>
   );
 }
