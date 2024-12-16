@@ -531,38 +531,39 @@ export function TokenDetail({ id }: { id: string }) {
     <div className="space-y-6">
       <Header />
       {/* Token Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="flex flex-row ">
-          <div>
-            <CardContent className="p-4">
-              <div className="text-sm text-gray-400">Total Supply</div>
-              <div className="text-xl font-bold text-green-400">
-                {token.supply}
-              </div>
-            </CardContent>
-          </div>
-          <div>
-            <CardContent className="p-4">
-              <div className="text-sm text-gray-400">Creator</div>
-              <div className="text-xl font-bold text-green-400">
-                {formatWalletAddress(token.owner)}
-              </div>
-            </CardContent>
-          </div>
-          <div>
-            <CardContent className="p-4">
-              <div className="text-sm text-gray-400">Market Cap</div>
-              <div className="text-xl font-bold text-green-400">
-                {!tokenAddress
-                  ? null
-                  : marketCap != null
-                  ? marketCap.toLocaleString() + "USD"
-                  : "Getting Market Cap..."}
-              </div>
-            </CardContent>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div className="flex flex-col md:flex-row">
+    <div>
+      <CardContent className="p-4">
+        <div className="text-sm text-gray-400">Total Supply</div>
+        <div className="text-xl font-bold text-green-400">
+          {token.supply}
         </div>
-      </div>
+      </CardContent>
+    </div>
+    <div>
+      <CardContent className="p-4">
+        <div className="text-sm text-gray-400">Creator</div>
+        <div className="text-xl font-bold text-green-400">
+          {formatWalletAddress(token.owner)}
+        </div>
+      </CardContent>
+    </div>
+    <div>
+      <CardContent className="p-4">
+        <div className="text-sm text-gray-400">Market Cap</div>
+        <div className="text-xl font-bold text-green-400">
+          {!tokenAddress
+            ? null
+            : marketCap != null
+            ? marketCap.toLocaleString() + "USD"
+            : "Getting Market Cap..."}
+        </div>
+      </CardContent>
+    </div>
+  </div>
+</div>
+
 
       {/* Chart and Trading and Bidding Progress*/}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -718,6 +719,23 @@ export function TokenDetail({ id }: { id: string }) {
       {/*  list of selected address and Holder distribution */}
 
       {launched &&  <Card className="bg-green-900/20 border-green-400">
+              <CardHeader>
+                  <CardTitle className="text-green-400">Next Selling Window</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-2">
+                    <div className="text-xl font-bold text-green-400">
+                      {/* Replace with your countdown timer */}
+                      <CountdownTimer
+                        endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
+                        migrated={false}
+                      />
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      Time until the next selling window opens.
+                    </div>
+                  </div>
+                </CardContent>
         
         <CardHeader>
           <CardTitle className="text-green-400">
@@ -746,7 +764,7 @@ export function TokenDetail({ id }: { id: string }) {
 
 
       {/* Trade History and Token Info */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className=" flex flex-col md:grid grid-cols-4 gap-4">
           {/* Trade History Section */}
           <div className="col-span-3">
             <Card className="bg-green-900/20 border-green-400 h-full">
@@ -804,23 +822,27 @@ export function TokenDetail({ id }: { id: string }) {
                   </div>
                 </div>
               </CardContent>
-              <CardHeader>
-                  <CardTitle className="text-green-400">Next Selling Window</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center space-y-2">
-                    <div className="text-xl font-bold text-green-400">
-                      {/* Replace with your countdown timer */}
-                      <CountdownTimer
-                        endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
-                        migrated={false}
-                      />
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      Time until the next selling window opens.
-                    </div>
-                  </div>
-                </CardContent>
+              {!launched && 
+                 <>
+                 <CardHeader>
+                     <CardTitle className="text-green-400">Next Selling Window</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     <div className="text-center space-y-2">
+                       <div className="text-xl font-bold text-green-400">
+                         {/* Replace with your countdown timer */}
+                         <CountdownTimer
+                           endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
+                           migrated={false}
+                         />
+                       </div>
+                       <div className="text-sm text-gray-400">
+                         Time until the next selling window opens.
+                       </div>
+                     </div>
+                   </CardContent>
+                 </>
+              }
             </Card>
           </div>
         </div>

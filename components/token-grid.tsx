@@ -254,98 +254,91 @@ export function TokenGrid() {
           <CardTitle className="text-green-400">Create New Token</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleNewToken} className="space-y-4">
-            <div className="grid grid-cols-4 gap-2">
-              <div>
-                <Label htmlFor="name" className="text-green-400">Token Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={newToken.name}
-                  onChange={handleInputChange}
-                  className="bg-green-900/30 border-green-400 text-white"
-                />
-              </div>
-              <div>
-                <Label htmlFor="symbol" className="text-green-400">Token Symbol</Label>
-                <Input
-                  id="symbol"
-                  name="symbol"
-                  value={newToken.symbol}
-                  onChange={handleInputChange}
-                  className="bg-green-900/30 border-green-400 text-white"
-                />
-              </div>
-              <div>
-              <Label htmlFor="description" className="text-green-400">Description</Label>
-              <Input
-                id="description"
-                name="description"
-                value={newToken.description}
-                onChange={handleInputChange}
-                className="bg-green-900/30 border-green-400 text-white"
-              />
-            </div>
+        <form onSubmit={handleNewToken} className="space-y-4">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+    <div>
+      <Label htmlFor="name" className="text-green-400">Token Name</Label>
+      <Input
+        id="name"
+        name="name"
+        value={newToken.name}
+        onChange={handleInputChange}
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+    <div>
+      <Label htmlFor="symbol" className="text-green-400">Token Symbol</Label>
+      <Input
+        id="symbol"
+        name="symbol"
+        value={newToken.symbol}
+        onChange={handleInputChange}
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+    <div>
+      <Label htmlFor="description" className="text-green-400">Description</Label>
+      <Input
+        id="description"
+        name="description"
+        value={newToken.description}
+        onChange={handleInputChange}
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+    <div>
+      <Label htmlFor="image" className="text-green-400">Upload Image</Label>
+      <Input
+        id="image"
+        name="image"
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+  </div>
 
-            <div>
-              <Label htmlFor="image" className="text-green-400">Upload Image</Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="bg-green-900/30 border-green-400 text-white"
-              />
-            </div>
-            </div>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+    <div>
+      <Label htmlFor="x" className="text-green-400">X Link (optional)</Label>
+      <Input
+        id="x"
+        name="x"
+        value={newToken.social.x}
+        onChange={handleInputChange}
+        placeholder="https://twitter.com/username"
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+    <div>
+      <Label htmlFor="tg" className="text-green-400">Telegram Link (optional)</Label>
+      <Input
+        id="tg"
+        name="tg"
+        value={newToken.social.tg}
+        onChange={handleInputChange}
+        placeholder="https://t.me/username"
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+    <div>
+      <Label htmlFor="ethAmount" className="text-green-400">Eth Amount to buy new token (optional)</Label>
+      <Input
+        id="ethAmount"
+        type="number"
+        name="ethAmount"
+        value={ethAmount}
+        onChange={(e) => setEthAmount(e.target.value)}
+        className="bg-green-900/30 border-green-400 text-white"
+      />
+    </div>
+  </div>
 
-            <div className="grid grid-cols-3 gap-2">
-            
+  <span className="text-red-600 mt-2">{error}</span>
+  <Button type="submit" className="w-full bg-green-400 text-black hover:bg-green-300">Create Token</Button>
+</form>
 
-            <div>
-                <Label htmlFor="x" className="text-green-400">X  Link (optional)</Label>
-                <Input
-                  id="x"
-                  name="x"
-                  value={newToken.social.x}
-                  onChange={handleInputChange}
-                  placeholder="https://twitter.com/username"
-                  className="bg-green-900/30 border-green-400 text-white"
-                />
-              </div>
-              <div>
-                <Label htmlFor="tg" className="text-green-400">Telegram Link (optional)</Label>
-                <Input
-                  id="tg"
-                  name="tg"
-                  value={newToken.social.tg}
-                  onChange={handleInputChange}
-                  placeholder="https://t.me/username"
-                  className="bg-green-900/30 border-green-400 text-white"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="ethAmount" className="text-green-400">Eth Amount to buy new token (optional)</Label>
-                <Input
-                  id="ethAmount"
-                  type="number"
-                  name="ethAmount"
-                  value={ethAmount}
-                  onChange={(e)=>setEthAmount(e.target.value) }
-                  className="bg-green-900/30 border-green-400 text-white"
-                />
-              </div>
-
-
-            </div>
-           
-              
-            
-              <span className="text-red-600 mt-2"> {error}</span>
-            <Button type="submit" className="w-full bg-green-400 text-black hover:bg-green-300">Create Token</Button>
-          </form>
         </CardContent>
       </Card>
 
