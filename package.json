@@ -12,7 +12,7 @@
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
-    "@reown/appkit": "^1.5.3",
+    "@reown/appkit": "^1.6.0",
     "@reown/appkit-adapter-ethers5": "^1.5.3",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
@@ -33,6 +33,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.16",
+    "pino-pretty": "^13.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
