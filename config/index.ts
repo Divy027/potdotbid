@@ -10,5 +10,5 @@ export const BondingCurve = {
 export const ERC20ABI = ercABI;
 export const TokenABI = tokenabi;
 
-export const indexer = "https://indexer.dev.hyperindex.xyz/36b50e6/v1/graphql"
+export const indexer = "https://indexer.dev.hyperindex.xyz/43fd84f/v1/graphql"
 export const RPC = "https://eth-sepolia.public.blastapi.io"
