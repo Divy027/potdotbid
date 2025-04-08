@@ -60,7 +60,7 @@ This project is licensed under the MIT License.
 
 **Smart Contract Repository:** [GitHub](https://github.com/Divy027/potdotbid-contracts)
 
-**Backend Repository:** [GitHub](https://github.com/Divy027/potdotbid-backend)
+**Backend Repository:** [GitHub](https://github.com/Divy027/potdotbid-BE)
 
 
 
