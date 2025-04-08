@@ -56,5 +56,13 @@ The application will be running on `http://localhost:3000` (default Next.js port
 This project is licensed under the MIT License.
 
 ---
-**Repository:** [GitHub](https://github.com/Divy027/potdotbid)
+**Frontend Repository:** [GitHub](https://github.com/Divy027/potdotbid)
+
+**Smart Contract Repository:** [GitHub](https://github.com/Divy027/potdotbid-contracts)
+
+**Backend Repository:** [GitHub](https://github.com/Divy027/potdotbid-backend)
+
+
+
+
 
