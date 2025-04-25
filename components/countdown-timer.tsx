@@ -1,39 +1,68 @@
-import { useState, useEffect } from "react";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function CountdownTimer({ endTime, migrated }: any) {
-  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(endTime));
+"use client"
+
+import { useState, useEffect } from "react"
+
+interface CountdownTimerProps {
+  endTime: any
+  migrated: boolean
+}
+
+export function CountdownTimer({ endTime, migrated }: CountdownTimerProps) {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  })
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(endTime));
-    }, 1000);
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime()
+      const difference = endTime - now
 
-    return () => clearInterval(interval);
-  }, [endTime]);
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        })
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+      }
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function calculateTimeLeft(endTime: any) {
-    const difference = endTime - new Date().getTime();
-    const time = {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / (1000 * 60)) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
-    };
-    return difference > 0 ? time : null;
-  }
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
 
-  if (!migrated) {
-    return <span className="text-red-400">Countdown will be calculated after migration</span>;
-  }
+    return () => clearInterval(timer)
+  }, [endTime])
 
-  if (!timeLeft) {
-    return <span className="text-red-400">Time's up!</span>;
+  if (migrated) {
+    return <div className="text-green-400">Selling window is open!</div>
   }
 
   return (
-    <span>
-      {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-    </span>
-  );
+    <div className="flex justify-center items-center space-x-3">
+      <div className="flex flex-col items-center">
+        <div className="text-2xl font-bold text-green-400">{timeLeft.days}</div>
+        <div className="text-xs text-gray-400">Days</div>
+      </div>
+      <div className="text-green-400 text-2xl">:</div>
+      <div className="flex flex-col items-center">
+        <div className="text-2xl font-bold text-green-400">{timeLeft.hours.toString().padStart(2, "0")}</div>
+        <div className="text-xs text-gray-400">Hours</div>
+      </div>
+      <div className="text-green-400 text-2xl">:</div>
+      <div className="flex flex-col items-center">
+        <div className="text-2xl font-bold text-green-400">{timeLeft.minutes.toString().padStart(2, "0")}</div>
+        <div className="text-xs text-gray-400">Minutes</div>
+      </div>
+      <div className="text-green-400 text-2xl">:</div>
+      <div className="flex flex-col items-center">
+        <div className="text-2xl font-bold text-green-400">{timeLeft.seconds.toString().padStart(2, "0")}</div>
+        <div className="text-xs text-gray-400">Seconds</div>
+      </div>
+    </div>
+  )
 }

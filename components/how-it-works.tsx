@@ -1,41 +1,63 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { motion } from "framer-motion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
-export function HowItWorks({ onClose }: { onClose: () => void }) {
+interface HowItWorksProps {
+  onClose: () => void
+}
+
+export function HowItWorks({ onClose }: HowItWorksProps) {
   return (
-    <Card className="w-full max-w-xl bg-gray-900/90 text-gray-200 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-center">How It Works</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-center text-sm">
-          potdotbid prevents rugs by implementing a unique honeypot mechanism.
-          each coin on potdotbid is a{" "}
-          <span className="text-green-400">fair-launch</span> with{" "}
-          <span className="text-blue-400">no presale</span> and{" "}
-          <span className="text-orange-400">no team allocation</span>.
-        </p>
-        <div className="space-y-2 text-sm">
-          <p>step 1: pick a coin that you like</p>
-          <p>step 2: buy the coin on the bidding curve</p>
-          <p>step 3: wait for the bidding curve to complete</p>
-          <p>step 4: random addresses will be selected everyday for selling privileges</p>
-          <p>step 5: selected addresses can sell their allocated percentage</p>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" variant="outline" onClick={onClose}>
-          I&apos;m ready to bid
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+    <motion.div layout transition={{ duration: 0.3 }}>
+      <Card className="overflow-hidden border-green-700 bg-gradient-to-br from-green-950/80 to-black/90 backdrop-blur-sm shadow-lg shadow-green-900/20">
+        <CardHeader className="bg-gradient-to-r from-green-900/50 to-green-800/30 pb-4">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold text-green-400">How Pot.Bid Works</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-green-400 hover:text-green-300 hover:bg-green-900/30"
+            >
+              Close
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-green-400">1. Token Creation</h3>
+            <p className="text-green-300">
+              Users can create their own tokens by providing a name, symbol, description, and optional social links.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-green-400">2. Bidding Phase</h3>
+            <p className="text-green-300">
+              Once a token is created, it enters a bidding phase where community members can place bids to acquire the
+              token.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-green-400">3. Transparent Mechanics</h3>
+            <p className="text-green-300">
+              Pot.Bid operates with transparent mechanics, ensuring fair and open participation for all users.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-green-400">4. Community Governance</h3>
+            <p className="text-green-300">
+              The platform is governed by the community, allowing token holders to influence the direction and
+              development of Pot.Bid.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
 }

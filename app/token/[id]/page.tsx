@@ -9,7 +9,7 @@ interface TokenDetailPageProps {
 export default function TokenDetailPage({ params }: TokenDetailPageProps) {
   return (
     <div className="min-h-screen bg-black text-white">
-      <main className="container mx-auto px-4 py-8">
+      <main className=" mx-auto">
         <TokenDetail id={params.id} />
       </main>
     </div>

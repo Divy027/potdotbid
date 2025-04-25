@@ -3,13 +3,19 @@ import { Header } from "./header";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion"
 import { Input } from "@/components/ui/input";
 import { Copy } from "lucide-react";
 // import { TokenChart } from "@/components/token-chart"
 import { TradeHistory } from "@/components/trade-history";
 import { BiddingProgress } from "@/components/bidding-progress";
+import logo from "../app/potdotbidLogo.jpg"
 import { HolderDistribution } from "@/components/holder-distribution";
+import Image from "next/image"
+
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -37,6 +43,7 @@ export function TokenDetail({ id }: { id: string }) {
     owner: "0xabcd...ef12",
     supply: 1e9,
     currentPrice: "0.001 ETH",
+    logo: null,
     biddingProgress: 65,
     nextSellingTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
     selectedAddresses: ["0x1234567890abcdef1234567890abcdef12345678"],
@@ -526,354 +533,352 @@ export function TokenDetail({ id }: { id: string }) {
       fetchEligibleAddresses()
     }
   }, [tokenAddress]);
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-black to-green-950">
       <Header />
-      {/* Token Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div className="flex flex-col md:flex-row">
-    <div>
-      <CardContent className="p-4">
-        <div className="text-sm text-gray-400">Total Supply</div>
-        <div className="text-xl font-bold text-green-400">
-          {token.supply}
-        </div>
-      </CardContent>
-    </div>
-    <div>
-      <CardContent className="p-4">
-        <div className="text-sm text-gray-400">Creator</div>
-        <div className="text-xl font-bold text-green-400">
-          {formatWalletAddress(token.owner)}
-        </div>
-      </CardContent>
-    </div>
-    <div>
-      <CardContent className="p-4">
-        <div className="text-sm text-gray-400">Market Cap</div>
-        <div className="text-xl font-bold text-green-400">
-          {!tokenAddress
-            ? null
-            : marketCap != null
-            ? marketCap.toLocaleString() + "USD"
-            : "Getting Market Cap..."}
-        </div>
-      </CardContent>
-    </div>
-  </div>
-</div>
 
-
-      {/* Chart and Trading and Bidding Progress*/}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3">
-          {/* <Card className="bg-green-900/20 border-green-400"> */}
-            <CardContent className="p-4 h-[400px]">
-              <TradingViewChart priceData={priceData}/>
-            </CardContent>
-          {/* </Card> */}
-        </div>
-        <div className="lg:col-span-1">
-          <Card className="bg-green-900/20 border-green-400">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-green-400">Trade</CardTitle>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`text-sm ${
-                      tradeType === "buy" ? "text-green-400" : "text-gray-400"
-                    }`}
-                  >
-                    Buy
-                  </span>
-                  <Switch
-                    checked={tradeType === "sell"}
-                    onCheckedChange={(checked) =>
-                      handleTradeTypeChange(!checked)
-                    }
-                  />
-                  <span
-                    className={`text-sm ${
-                      tradeType === "sell" ? "text-green-400" : "text-gray-400"
-                    }`}
-                  >
-                    Sell
-                  </span>
+      <main className="container mx-auto px-4 py-8">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-green-400 text-xl">Loading token data...</div>
+          </div>
+        ) : (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.1,
+                },
+              },
+            }}
+            className="space-y-8"
+          >
+            {/* Token Header */}
+            <motion.div
+              variants={fadeIn}
+              className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-black text-2xl font-bold">
+                <Image
+                src={token?.logo || logo}
+                alt={token.name}
+                width={50}
+                height={50}
+                className="rounded-full border-2 border-green-500"
+                loading="lazy"
+              />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-green-400">{token.name}</h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-gray-400">{token.symbol}</span>
+                    <Badge variant="outline" className="text-xs border-green-700 text-green-400">
+                      {launched ? "Launched" : "Bidding"}
+                    </Badge>
+                  </div>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className={launched ? "space-y-4 brightness-50 pointer-events-none" : "space-y-4"}>
-              
-                <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>Amount</span>
-                  <span>
-                    Balance:{" "}
-                    {tradeType == "sell"
-                      ? tradeType == "sell" &&
-                        `${Number(tokenBalance).toFixed(4)} ${token.symbol}`
-                      : tradeType == "buy" && tradeUnit == "ETH"
-                      ? `${Number(ethBalance).toFixed(4)} ETH`
-                      : `${Number(tokenBalance).toFixed(4)} ${token.symbol}`}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2 bg-green-900/30 rounded-md p-2">
-                  <Input
-                    type="number"
-                    placeholder="0.0"
-                    value={
-                      tradeType === "sell"
-                        ? tokenAmount
-                        : tradeUnit === "ETH"
-                        ? ethAmount
-                        : tokenAmount
-                    }
-                    onChange={(e) => {
-                      if (tradeType === "sell") {
-                        handleTokenAmountChange(e.target.value);
-                      } else {
-                        if (tradeUnit === "ETH") {
-                          handleEthAmountChange(e.target.value);
-                        } else {
-                          handleTokenAmountChange(e.target.value);
-                        }
-                      }
-                    }}
-                    className="bg-transparent border-none text-white text-lg"
-                  />
-                  {tradeType === "buy" ? (
-                    <Select
-                      onValueChange={(value) => {
-                        setTokenAmount("");
-                        setEthAmount("");
-                        setTradeUnit(value);
-                      }}
-                      defaultValue="ETH"
-                    >
-                      <SelectTrigger className="w-[100px]">
-                        <SelectValue placeholder="Select unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ETH">ETH</SelectItem>
-                        <SelectItem value={token.symbol}>
-                          {token.symbol}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      className="bg-green-800 text-green-400"
-                    >
-                      {token.symbol}
-                    </Button>
-                  )}
-                </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  className="border-green-700 text-green-400 hover:bg-green-700 hover:text-white"
+                >
+                  Share
+                </Button>
+                <Button className="bg-green-400 text-black hover:bg-green-300">
+                  {launched ? "Trade on Uniswap" : "Participate in Bidding"}
+                </Button>
               </div>
-              {tradeType == "buy" && tradeUnit == "ETH" && (
-                <>
-                  <span className=" text-white">
-                    {" "}
-                    You will recieve {tokenAmount} {token.symbol}{" "}
-                  </span>
-                </>
-              )}
-              {tradeType == "buy" && tradeUnit == token.symbol && (
-                <>
-                  <span className=" text-white">
-                    {" "}
-                    You will pay {ethAmount} ETH{" "}
-                  </span>
-                </>
-              )}
-              {tradeType == "sell" && (
-                <>
-                  <span className=" text-white">
-                    {" "}
-                    You will recieve {ethAmount} ETH{" "}
-                  </span>
-                </>
-              )}
-              <Button
-                className="w-full bg-green-400 text-black hover:bg-green-300"
-                onClick={handlebuysell}
-              >
-                {tradeType === "sell"
-                  ? `Sell ${token.symbol}`
-                  : `Buy ${token.symbol}`}
-              </Button>
-              
-            </CardContent>
-            <CardHeader>
-              <CardTitle className="text-green-400">Bidding Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BiddingProgress progress={progress || 0} launched={launched} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </motion.div>
 
+            {/* Token Stats */}
+            <motion.div variants={fadeIn} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="bg-green-900/20 border-green-700">
+                <CardContent className="p-4">
+                  <div className="text-sm text-gray-400">Total Supply</div>
+                  <div className="text-xl font-bold text-green-400">{token.supply}</div>
+                </CardContent>
+              </Card>
 
-      {/*  list of selected address and Holder distribution */}
+              <Card className="bg-green-900/20 border-green-700">
+                <CardContent className="p-4">
+                  <div className="text-sm text-gray-400">Creator</div>
+                  <div className="text-xl font-bold text-green-400">{formatWalletAddress(token.owner)}</div>
+                </CardContent>
+              </Card>
 
-      {launched &&  <Card className="bg-green-900/20 border-green-400">
-              <CardHeader>
-                  <CardTitle className="text-green-400">Next Selling Window</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center space-y-2">
-                    <div className="text-xl font-bold text-green-400">
-                      {/* Replace with your countdown timer */}
-                      <CountdownTimer
-                        endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
-                        migrated={false}
-                      />
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      Time until the next selling window opens.
-                    </div>
+              <Card className="bg-green-900/20 border-green-700">
+                <CardContent className="p-4">
+                  <div className="text-sm text-gray-400">Market Cap</div>
+                  <div className="text-xl font-bold text-green-400">
+                    {marketCap ? `$${marketCap.toLocaleString()}` : "Calculating..."}
                   </div>
                 </CardContent>
-        
-        <CardHeader>
-          <CardTitle className="text-green-400">
-            Addresses Selected for Selling
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HolderDistribution holders={holders} />
-        </CardContent>
-        <CardHeader>
-          <CardTitle className="text-green-400">Holder Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-        {loading? 
-          <>
-            <div className="text-center text-white">Loading...</div>
-          </> :
-          <>
-              <HolderDistribution holders={holders} />
-          </>}
-         
-        </CardContent>
-      </Card> }
-     
+              </Card>
 
-
-
-      {/* Trade History and Token Info */}
-      <div className=" flex flex-col md:grid grid-cols-4 gap-4">
-          {/* Trade History Section */}
-          <div className="col-span-3">
-            <Card className="bg-green-900/20 border-green-400 h-full">
-              <CardHeader>
-                <CardTitle className="text-green-400">Trade History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading? 
-                  <>
-                    <div className="text-center text-white">Loading...</div>
-                  </> :
-                  <>
-                    <TradeHistory trades={trades} token={token} />
-                  </>}
-            
-              </CardContent>
-            </Card>
-          </div>
-  
-          {/* Token Information Section */}
-          <div className="col-span-1">
-            <Card className="bg-green-900/20 border-green-400 h-full">
-              <CardHeader>
-                <CardTitle className="text-green-400">Token Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-400">Name</div>
-                  <div className="font-bold text-gray-400 px-2 py-1">
-                    {token.name} ({token.symbol})
+              {/* <Card className="bg-green-900/20 border-green-700">
+                <CardContent className="p-4">
+                  <div className="text-sm text-gray-400">Current Price</div>
+                  <div className="text-xl font-bold text-green-400">
+                    {priceData.length > 0 ? `${priceData[priceData.length - 1]} ETH` : "N/A"}
                   </div>
-                </div>
-                <div>
-                <div className="text-sm text-gray-400">Description</div>
-                  <div
-                    className="text-sm text-gray-400 px-2 py-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 s  crollbar-track-green-900 rounded"
+                </CardContent>
+              </Card> */}
+            </motion.div>
+
+            {/* Chart and Trading */}
+            <motion.div variants={fadeIn} className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <Card className="lg:col-span-3 bg-green-900/20 border-green-700">
+                <CardHeader className="border-b border-green-800">
+                  <CardTitle className="text-green-400">Price Chart</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 h-[400px]">
+                  <TradingViewChart priceData={priceData} />
+                </CardContent>
+              </Card>
+
+              <div className="lg:col-span-1 space-y-4">
+                <Card className="bg-green-900/20 border-green-700">
+                  <CardHeader className="border-b border-green-800">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-green-400">Trade</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm ${tradeType === "buy" ? "text-green-400" : "text-gray-400"}`}>
+                          Buy
+                        </span>
+                        <Switch
+                          checked={tradeType === "sell"}
+                          onCheckedChange={(checked) => handleTradeTypeChange(!checked)}
+                        />
+                        <span className={`text-sm ${tradeType === "sell" ? "text-green-400" : "text-gray-400"}`}>
+                          Sell
+                        </span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className={`space-y-4 ${launched ? "brightness-50 pointer-events-none" : ""}`}>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm text-gray-400">
+                        <span>Amount</span>
+                        <span>
+                          Balance:{" "}
+                          {tradeType === "sell"
+                            ? `${Number(tokenBalance).toFixed(4)} ${token.symbol}`
+                            : tradeUnit === "ETH"
+                              ? `${Number(ethBalance).toFixed(4)} ETH`
+                              : `${Number(tokenBalance).toFixed(4)} ${token.symbol}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2 bg-green-900/30 rounded-md p-2">
+                        <Input
+                          type="number"
+                          placeholder="0.0"
+                          value={tradeType === "sell" ? tokenAmount : tradeUnit === "ETH" ? ethAmount : tokenAmount}
+                          onChange={(e) => {
+                            if (tradeType === "sell") {
+                              handleTokenAmountChange(e.target.value)
+                            } else {
+                              if (tradeUnit === "ETH") {
+                                handleEthAmountChange(e.target.value)
+                              } else {
+                                handleTokenAmountChange(e.target.value)
+                              }
+                            }
+                          }}
+                          className="bg-transparent border-none text-white text-lg"
+                        />
+                        {tradeType === "buy" ? (
+                          <Select
+                            onValueChange={(value) => {
+                              setTokenAmount("")
+                              setEthAmount("")
+                              setTradeUnit(value)
+                            }}
+                            defaultValue="ETH"
+                          >
+                            <SelectTrigger className="w-[100px] border-green-700">
+                              <SelectValue placeholder="Select unit" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-green-900 border-green-700">
+                              <SelectItem value="ETH">ETH</SelectItem>
+                              <SelectItem value={token.symbol}>{token.symbol}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Button variant="secondary" className="bg-green-800 text-green-400">
+                            {token.symbol}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {tradeType === "buy" && tradeUnit === "ETH" && (
+                      <div className="text-sm text-white bg-green-900/30 p-2 rounded-md">
+                        You will receive <span className="text-green-400 font-bold">{tokenAmount}</span> {token.symbol}
+                      </div>
+                    )}
+
+                    {tradeType === "buy" && tradeUnit === token.symbol && (
+                      <div className="text-sm text-white bg-green-900/30 p-2 rounded-md">
+                        You will pay <span className="text-green-400 font-bold">{ethAmount}</span> ETH
+                      </div>
+                    )}
+
+                    {tradeType === "sell" && (
+                      <div className="text-sm text-white bg-green-900/30 p-2 rounded-md">
+                        You will receive <span className="text-green-400 font-bold">{ethAmount}</span> ETH
+                      </div>
+                    )}
+
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button className="w-full relative overflow-hidden group" onClick={handlebuysell}>
+                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-green-400 to-emerald-300 transition-transform duration-300"></span>
+                        <span className="relative text-black font-bold">
+                          {tradeType === "sell" ? `Sell ${token.symbol}` : `Buy ${token.symbol}`}
+                        </span>
+                      </Button>
+                    </motion.div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-green-900/20 border-green-700">
+                  <CardHeader className="border-b border-green-800">
+                    <CardTitle className="text-green-400">Bidding Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <BiddingProgress progress={progress || 0} launched={launched} />
+                  </CardContent>
+                </Card>
+              </div>
+            </motion.div>
+
+            {/* Tabs for Token Details */}
+            <motion.div variants={fadeIn}>
+              <Tabs defaultValue="trades" className="w-full">
+                <TabsList className="grid grid-cols-4 bg-green-900/30 border border-green-800">
+                  <TabsTrigger
+                    value="trades"
+                    className="data-[state=active]:bg-green-800 data-[state=active]:text-green-400"
                   >
-                    {token.description}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-400">Contract Address</div>
-                  <div className="flex items-center space-x-2">
-                    <code className="text-sm text-gray-400 px-2 py-1 rounded">
-                      {formatWalletAddress(tokenAddress)}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => copyToClipboard(tokenAddress)}
-                      className="text-green-400 hover:text-green-300"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-              {!launched && 
-                 <>
-                 <CardHeader>
-                     <CardTitle className="text-green-400">Next Selling Window</CardTitle>
-                   </CardHeader>
-                   <CardContent>
-                     <div className="text-center space-y-2">
-                       <div className="text-xl font-bold text-green-400">
-                         {/* Replace with your countdown timer */}
-                         <CountdownTimer
-                           endTime={token.nextSellingTime || 24 * 60 * 60 * 1000}
-                           migrated={false}
-                         />
-                       </div>
-                       <div className="text-sm text-gray-400">
-                         Time until the next selling window opens.
-                       </div>
-                     </div>
-                   </CardContent>
-                 </>
-              }
-            </Card>
-          </div>
-        </div>
+                    Trade History
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="holders"
+                    className="data-[state=active]:bg-green-800 data-[state=active]:text-green-400"
+                  >
+                    Holder Distribution
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="info"
+                    className="data-[state=active]:bg-green-800 data-[state=active]:text-green-400"
+                  >
+                    Token Info
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="selling"
+                    className="data-[state=active]:bg-green-800 data-[state=active]:text-green-400"
+                  >
+                    Selling Window
+                  </TabsTrigger>
+                </TabsList>
 
-        {!launched &&  <Card className="bg-green-900/20 border-green-400">
-        
-        <CardHeader>
-          <CardTitle className="text-green-400">
-            Addresses Selected for Selling
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HolderDistribution holders={holders} />
-        </CardContent>
-        <CardHeader>
-          <CardTitle className="text-green-400">Holder Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-        {loading? 
-          <>
-            <div className="text-center text-white">Loading...</div>
-          </> :
-          <>
-              <HolderDistribution holders={holders} />
-          </>}
-         
-        </CardContent>
-      </Card> }
+                <TabsContent value="trades" className="mt-4">
+                  <Card className="bg-green-900/20 border-green-700">
+                    <CardHeader className="border-b border-green-800">
+                      <CardTitle className="text-green-400">Trade History</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <TradeHistory trades={trades} token={token} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
+                <TabsContent value="holders" className="mt-4">
+                  <Card className="bg-green-900/20 border-green-700">
+                    <CardHeader className="border-b border-green-800">
+                      <CardTitle className="text-green-400">Holder Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <HolderDistribution holders={holders} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-      
+                <TabsContent value="info" className="mt-4">
+                  <Card className="bg-green-900/20 border-green-700">
+                    <CardHeader className="border-b border-green-800">
+                      <CardTitle className="text-green-400">Token Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-4">
+                      <div>
+                        <div className="text-sm text-gray-400">Name</div>
+                        <div className="font-bold text-gray-400 px-2 py-1">
+                          {token.name} ({token.symbol})
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-400">Description</div>
+                        <div className="text-sm text-gray-400 px-2 py-1 max-h-32 overflow-y-auto rounded">
+                          {token.description}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-400">Contract Address</div>
+                        <div className="flex items-center space-x-2">
+                          <code className="text-sm text-gray-400 px-2 py-1 rounded bg-green-900/30">
+                            {tokenAddress}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => copyToClipboard(tokenAddress)}
+                            className="text-green-400 hover:text-green-300"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="selling" className="mt-4">
+                  <Card className="bg-green-900/20 border-green-700">
+                    <CardHeader className="border-b border-green-800">
+                      <CardTitle className="text-green-400">Next Selling Window</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-4">
+                        <div className="text-2xl font-bold text-green-400">
+                          <CountdownTimer endTime={token.nextSellingTime || 24 * 60 * 60 * 1000} migrated={false} />
+                        </div>
+                        <div className="text-sm text-gray-400">Time until the next selling window opens.</div>
+                      </div>
+
+                      {launched && (
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-green-400 mb-3">Addresses Selected for Selling</h3>
+                          <HolderDistribution holders={holders.slice(0, 3)} />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </motion.div>
+          </motion.div>
+        )}
+      </main>
     </div>
   );
 }

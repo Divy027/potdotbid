@@ -108,7 +108,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({ priceData }) => {
   return (
     <div
       ref={chartContainerRef}
-      style={{ width: "100%", height: "400px", position: "relative" }}
+      style={{ width: "100%", height: "380px", position: "relative" }}
     />
   );
 };
