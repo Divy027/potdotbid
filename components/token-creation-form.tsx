@@ -377,7 +377,7 @@ export function TokenCreationForm() {
                       onChange={(e) => setEthAmount(e.target.value)}
                       className="bg-green-900/30 border-green-700 text-white focus:border-green-500 focus:ring-green-500/20"
                       placeholder="0.1"
-                      step="0.01"
+                      step="0.0000000001"
                       min="0"
                     />
                   </div>

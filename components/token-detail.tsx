@@ -364,6 +364,8 @@ export function TokenDetail({ id }: { id: string }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort((a: any, b:any) => a.time - b.time); 
 
+      console.log("PRICESS",formattedData);
+
       setPriceData(formattedData);
       const latestEvent = latestPriceData.data.Bidding_PriceChanged[0]; // Latest price event
       const newPrice = Number(latestEvent.newPrice) / 10 ** 18; // Bonding curve price in ETH
