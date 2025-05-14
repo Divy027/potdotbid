@@ -13,6 +13,9 @@ import { useAppKitAccount } from "@reown/appkit/react"
 import { useAppKitProvider } from "@reown/appkit/react"
 import { BondingCurve, indexer } from "@/config"
 import { Button } from "@/components/ui/button"
+import { delay } from "@/lib/utils"
+// @ts-ignore
+import PriceIndexer from "price-indexer"
 interface TokenCardProps {
   token: any
   type: "bidding" | "completed"
@@ -35,12 +38,13 @@ export function TokenCard({ token, type, index }: TokenCardProps) {
 
   const fetchLatestEthPrice = async () => {
     try {
-      const response = await fetch(`https://api.basescan.org/api?module=stats&action=ethprice&apikey=${process.env.NEXT_PUBLIC_BASE_API_KEY}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch ETH price from CoinGecko");
-      }
-      const data = await response.json();
-      const ethPrice = data.result.ethusd;
+     await delay(1000);
+     
+    let fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
+    console.log(fetchPriceIndex);
+
+     // const data = await response.json();
+      const ethPrice = fetchPriceIndex;
       console.log("Latest ETH Price (USD):", ethPrice);
       return Number(ethPrice); // Return the fetched price
     } catch (error) {

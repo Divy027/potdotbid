@@ -3,29 +3,34 @@ import { Header } from "@/components/header"
 import { TokenGrid } from "@/components/token-grid"
 import { backend_url } from "@/config"
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { TokenCreationForm } from "@/components/token-creation-form"
 
 import { motion } from "framer-motion"
 export default function Home() {
   const [tokens, setTokens] = useState<any[]>([])
-  useEffect(() => {
-    // Fetch all tokens on component mount
-    async function fetchTokens() {
-      try {
-        const response = await axios.get(`${backend_url}/api/tokens/getAll`)
-        if (response.data.success) {
-          setTokens(response.data.tokens)
-          console.log(response.data.tokens)
-        }
-      } catch (error) {
-        console.error("Error fetching tokens:", error)
+  const fetchTokens = useCallback(async () => { // Wrapped in useCallback
+    try {
+      const response = await axios.get(`${backend_url}/api/tokens/getAll`)
+      if (response.data.success) {
+        setTokens(response.data.tokens)
+        console.log("Fetched tokens:", response.data.tokens)
       }
+    } catch (error) {
+      console.error("Error fetching tokens:", error)
     }
+  }, []) // Empty dependency array, fetchTokens itself doesn't change
 
+  useEffect(() => {
     fetchTokens()
-  }, [])
+  }, [fetchTokens]) // Call fetchTokens when the component mounts or fetchTokens changes (it won't here)
+
+  // This function will be called by TokenCreationForm after a new token is successfully created
+  const handleTokenCreated = () => {
+    console.log("New token created, re-fetching tokens in Home component...")
+    fetchTokens() // Re-fetch all tokens
+  }
   const biddingTokens = tokens.filter(token => token.status === "bidding")
   const completedTokens = tokens.filter(token => token.status === "completed")
   return (
@@ -56,7 +61,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <TokenCreationForm />
+          <TokenCreationForm onTokenCreated={handleTokenCreated} />
         </motion.div>
 
         <motion.div

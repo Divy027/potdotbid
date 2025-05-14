@@ -12,7 +12,8 @@ import { BiddingProgress } from "@/components/bidding-progress";
 import logo from "../app/potdotbidLogo.jpg"
 import { HolderDistribution } from "@/components/holder-distribution";
 import Image from "next/image"
-
+// @ts-ignore
+import PriceIndexer  from 'price-indexer';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -25,10 +26,10 @@ import {
 } from "@/components/ui/select";
 import { CountdownTimer } from "./countdown-timer";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import { backend_url, BondingCurve, ERC20ABI, indexer, RPC, TokenABI } from "@/config";
 import { toast } from "react-toastify";
-import { formatWalletAddress } from "@/lib/utils";
+import { delay, formatWalletAddress } from "@/lib/utils";
 import axios from "axios";
 import TradingViewChart from "./TradingViewChart";
 
@@ -170,7 +171,7 @@ export function TokenDetail({ id }: { id: string }) {
         const tx = await BondingContract.purchaseToken(
           tokenAddress,
           outAmount,
-          { value: ethers.utils.parseEther(ethAmount).add(1) }
+          { value: ethers.utils.parseEther(ethAmount) }
         );
         await tx.wait();
   
@@ -300,12 +301,11 @@ export function TokenDetail({ id }: { id: string }) {
 
   const fetchLatestEthPrice = async () => {
     try {
-      const response = await fetch(`https://api.basescan.org/api?module=stats&action=ethprice&apikey=${process.env.NEXT_PUBLIC_BASE_API_KEY}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch ETH price from CoinGecko");
-      }
-      const data = await response.json();
-      const ethPrice = data.result.ethusd;
+      await delay(1000);
+      let fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
+      console.log(fetchPriceIndex);
+
+      const ethPrice = fetchPriceIndex;
       console.log("Latest ETH Price (USD):", ethPrice);
       return Number(ethPrice); // Return the fetched price
     } catch (error) {
@@ -382,7 +382,17 @@ export function TokenDetail({ id }: { id: string }) {
         parseFloat(latestPriceData.data.Bidding_Poolstate[0].tokenReserve) /
         10 ** 18;
         console.log("RESERVE",tokenReserve);
-      if (tokenReserve === 0) {
+
+        const provider = new ethers.providers.Web3Provider(walletProvider as any);
+        const BondingContract = new ethers.Contract(
+          BondingCurve.contractAddress,
+          BondingCurve.ABI,
+          provider
+        );
+
+      const Launced = await BondingContract.functions.virtualPools(tokenAddress);
+      console.log(Launced)
+      if (Launced.launched) {
         setLaunched(true);
       }
       const totalSupply = tokenReserve + circulatingSupply;

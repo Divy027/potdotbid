@@ -31,8 +31,11 @@ interface Token {
     holders: number
     status: "bidding" | "completed"
   }
+  interface TokenCreationFormProps {
+    onTokenCreated: () => void; // Define the prop type
+  }
   
-export function TokenCreationForm() {
+export function TokenCreationForm({ onTokenCreated }: TokenCreationFormProps) {
   const [tokens, setTokens] = useState<Token[]>([])
   const [isExpanded, setIsExpanded] = useState(false)
   const [newToken, setNewToken] = useState({
@@ -46,7 +49,7 @@ export function TokenCreationForm() {
   })
   const { isConnected} = useAppKitAccount()
   const { walletProvider } = useAppKitProvider('eip155')
-  const [ethAmount, setEthAmount] = useState("")
+  const [ethAmount, setEthAmount] = useState("0")
   const [error, setError] = useState("")
   const [imagePreview, setImagePreview] = useState(null)
 
@@ -101,17 +104,20 @@ export function TokenCreationForm() {
                 };
 
                 try {
+                  console.log("New token update");
                     const response = await axios.post(`${backend_url}/api/tokens/create`, tokenData, {
                         headers: {
                             "Content-Type": "application/json",
                             "x-auth-token": localStorage.getItem('token')
                         }
                     });
+                    console.log(response);
 
                     if (response.data.success) {
                         setTokens((prevTokens) => [...prevTokens, response.data.token]);
                         setNewToken({ name: "", symbol: "", description: "", social: { x: "", tg: "" } });
                         toast.success("TOKEN CREATE SUCCESSFULL")
+                        onTokenCreated();
                         // Stop listening for the event after success
                        
                     }
@@ -158,6 +164,7 @@ export function TokenCreationForm() {
                       setTokens((prevTokens) => [...prevTokens, response.data.token]);
                       setNewToken({ name: "", symbol: "", description: "", social: { x: "", tg: "" } });
                       toast.success("TOKEN CREATE SUCCESSFULL")
+                      onTokenCreated();
                       // Stop listening for the event after success
                      
                   }
