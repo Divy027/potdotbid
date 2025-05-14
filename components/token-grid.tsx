@@ -1,20 +1,12 @@
 "use client"
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+
 import { TokenCard } from "@/components/token-card"
-import { backend_url, BondingCurve } from "@/config"
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react"
-import { ethers } from "ethers"
-import { toast } from "react-toastify"
 import { motion } from "framer-motion"
 
 
 interface TokenGridProps {
   title: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tokens: any[]
   emptyMessage: string
   type: "bidding" | "completed"
@@ -22,8 +14,7 @@ interface TokenGridProps {
 
 
 export function TokenGrid({ title, tokens, emptyMessage, type }: TokenGridProps) {
-  const [error, setError] = useState("");
-  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const container = {
     hidden: { opacity: 0 },
     show: {

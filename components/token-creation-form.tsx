@@ -15,28 +15,12 @@ import { ethers } from "ethers"
 import axios from "axios"
 import { toast } from "react-toastify"
 
-interface Token {
-    name: string
-    symbol: string
-    description: string
-    image: File | null
-    social: {
-      x: string
-      tg: string
-    }
-    price: string
-    marketCap: string
-    volume: string
-    liquidity: string
-    holders: number
-    status: "bidding" | "completed"
-  }
   interface TokenCreationFormProps {
     onTokenCreated: () => void; // Define the prop type
   }
   
 export function TokenCreationForm({ onTokenCreated }: TokenCreationFormProps) {
-  const [tokens, setTokens] = useState<Token[]>([])
+ 
   const [isExpanded, setIsExpanded] = useState(false)
   const [newToken, setNewToken] = useState({
     name: "",
@@ -114,7 +98,7 @@ export function TokenCreationForm({ onTokenCreated }: TokenCreationFormProps) {
                     console.log(response);
 
                     if (response.data.success) {
-                        setTokens((prevTokens) => [...prevTokens, response.data.token]);
+                        //setTokens((prevTokens) => [...prevTokens, response.data.token]);
                         setNewToken({ name: "", symbol: "", description: "", social: { x: "", tg: "" } });
                         toast.success("TOKEN CREATE SUCCESSFULL")
                         onTokenCreated();
@@ -161,7 +145,7 @@ export function TokenCreationForm({ onTokenCreated }: TokenCreationFormProps) {
                   });
 
                   if (response.data.success) {
-                      setTokens((prevTokens) => [...prevTokens, response.data.token]);
+                      //setTokens((prevTokens) => [...prevTokens, response.data.token]);
                       setNewToken({ name: "", symbol: "", description: "", social: { x: "", tg: "" } });
                       toast.success("TOKEN CREATE SUCCESSFULL")
                       onTokenCreated();
@@ -216,8 +200,7 @@ export function TokenCreationForm({ onTokenCreated }: TokenCreationFormProps) {
     setNewToken(prev => ({ ...prev, image: file }))
   }
 
-  const biddingTokens = tokens.filter(token => token.status === "bidding")
-  const completedTokens = tokens.filter(token => token.status === "completed")
+ 
 
   return (
     <motion.div layout transition={{ duration: 0.3 }}>

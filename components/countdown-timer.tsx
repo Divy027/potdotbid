@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react"
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface CountdownTimerProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   endTime: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   migrated: boolean
 }
 

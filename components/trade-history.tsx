@@ -10,12 +10,15 @@ interface Trade {
   type: string
   ethAmount: string
   amount: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestamp: any
   signature: string
 }
 
 interface TradeHistoryProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trades: Trade[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   token: any
 }
 

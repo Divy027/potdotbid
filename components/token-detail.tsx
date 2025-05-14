@@ -12,7 +12,7 @@ import { BiddingProgress } from "@/components/bidding-progress";
 import logo from "../app/potdotbidLogo.jpg"
 import { HolderDistribution } from "@/components/holder-distribution";
 import Image from "next/image"
-// @ts-ignore
+// @ts-expect-error Error contain error
 import PriceIndexer  from 'price-indexer';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { CountdownTimer } from "./countdown-timer";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { backend_url, BondingCurve, ERC20ABI, indexer, RPC, TokenABI } from "@/config";
 import { toast } from "react-toastify";
 import { delay, formatWalletAddress } from "@/lib/utils";
@@ -302,7 +302,7 @@ export function TokenDetail({ id }: { id: string }) {
   const fetchLatestEthPrice = async () => {
     try {
       await delay(1000);
-      let fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
+      const fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
       console.log(fetchPriceIndex);
 
       const ethPrice = fetchPriceIndex;
@@ -382,7 +382,7 @@ export function TokenDetail({ id }: { id: string }) {
         parseFloat(latestPriceData.data.Bidding_Poolstate[0].tokenReserve) /
         10 ** 18;
         console.log("RESERVE",tokenReserve);
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const provider = new ethers.providers.Web3Provider(walletProvider as any);
         const BondingContract = new ethers.Contract(
           BondingCurve.contractAddress,

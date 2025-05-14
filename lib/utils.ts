@@ -108,7 +108,7 @@ export const generateOHLCData = (priceData: PriceData[], intervalInMinutes: numb
 
   return ohlcData;
 };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function delay(ms: any) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

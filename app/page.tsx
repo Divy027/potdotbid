@@ -9,6 +9,7 @@ import { TokenCreationForm } from "@/components/token-creation-form"
 
 import { motion } from "framer-motion"
 export default function Home() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tokens, setTokens] = useState<any[]>([])
   const fetchTokens = useCallback(async () => { // Wrapped in useCallback
     try {

@@ -14,9 +14,10 @@ import { useAppKitProvider } from "@reown/appkit/react"
 import { BondingCurve, indexer } from "@/config"
 import { Button } from "@/components/ui/button"
 import { delay } from "@/lib/utils"
-// @ts-ignore
+//@ts-expect-error error contain error
 import PriceIndexer from "price-indexer"
 interface TokenCardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   token: any
   type: "bidding" | "completed"
   index: number
@@ -40,7 +41,7 @@ export function TokenCard({ token, type, index }: TokenCardProps) {
     try {
      await delay(1000);
      
-    let fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
+    const fetchPriceIndex = await new PriceIndexer("mainnet").basePrice();
     console.log(fetchPriceIndex);
 
      // const data = await response.json();
