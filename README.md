@@ -50,7 +50,7 @@ Start the development server:
  npm run dev
 ```
 
-The application will be running on `http://localhost:3000` (default Next.js port).
+The application will run on `http://localhost:3000` (default Next.js port).
 
 ## License
 This project is licensed under the MIT License.
